@@ -1,0 +1,13 @@
+#展示路径结构
+tree
+tree /f
+tree /f > *.txt
+
+#查看文件行数
+find /V "" /C *bigfile.txt
+
+#删除文件
+del *.txt
+
+#隐藏文件
+attrib +s +h *txt
