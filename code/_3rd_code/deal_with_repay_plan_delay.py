@@ -19,16 +19,24 @@ if __name__ == "__main__":
     df_cash_order_info = pd.read_csv(path_cash_order_info, low_memory=False)
     #print df_cash_order_info.head()
 
+    #print df_delay[:3]
     path_to_write = working_space + "results/order_info_delay.csv"
     with open(path_to_write, 'w') as f1:
-        for i in df_delay['order_id'][:3]:
+        # 添加表头字段
+        f1.write(','.join(df_cash_order_info.columns) + ',delay_days\n')
+        # 循环写入匹配的有还款计划客户的订单信息
+        # 以及逾期天数(数值小于等于0说明没逾期)
+        for i in df_delay['order_id']:
             list_to_strings = [str(x) for x in\
                     df_cash_order_info[df_cash_order_info[
-                        'order_id']==i].values[0]]
+                                            'order_id']==i].values[0]]
             strings_to_write = ','.join(list_to_strings)
+            # 在最后一列追加逾期天数
+            strings_to_write += ','
+            strings_to_write += str(df_delay[df_delay[
+                                'order_id']==i]['ACTUAL_DELAY_DAYS'].values[0])
             strings_to_write += '\n'
             f1.write(strings_to_write)
-
 
 
 
