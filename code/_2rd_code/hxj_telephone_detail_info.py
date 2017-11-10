@@ -98,12 +98,37 @@ def getMobileByCustidByOrderid(path_file_order_id, filename_order_id,\
             strings_to_write += '\n'
             f1.write(strings_to_write)
 
+def getTelephoneDetailInfoHavingRepayPlan(path_file, filename):
+    df_telephone_detail_info = pd.read_csv(path_file + filename)
+    df_needed = df_telephone_detail_info[
+            ['B1_VALUE', 'B3_VALUE', 'B4_VALUE', 'C1_VALUE', 'C2_VALUE', 'C3_VaLUE',
+            'C4_VALUE', 'C5_VALUE', 'C6_VALUE', 'C7_VALUE', 'C8_VALUE', 'C9_VALUE', 
+            'C10_VALUE', 'C11_VALUE', 'D1_VALUE', 'D2_VALUE', 'D3_VALUE', 'D4_VALUE',
+            'D5_VALUE', 'D6_VALUE', 'D7_VALUE', 'D8_VALUE', 'D9_VALUE', 'D10_VALUE',
+            'D11_VALUE', 'D12_VALUE', 'D13_VALUE', 'D14_VALUE', 'Ui_VALUE',]]
+    print df_needed.head()
+
 
 if __name__ == "__main__":
     working_space = "C:/Users/cherish/Desktop/exploratory_analysis/"
 
-    #
-    #通过order id 得到cust id
+    #通过mobile 在risk_ctrl_identificaiton_20171110.txt中
+    #得到电话详单部分的指定指标数据
+    path_file_risk_ctrl_identification =\
+            working_space + "data/_2rd_data/"
+    filename_risk_ctrl_identification = "risk_ctrl_identification_20171109.txt"
+    getTelephoneDetailInfoHavingRepayPlan(path_file_risk_ctrl_identification,\
+            filename_risk_ctrl_identification)
+
+
+
+
+
+
+
+    #通过order_id 在cash_order_info_20171110.txt中得到cust_id
+    #通过cust_id 在customer_base_info_20171110.txt中得到mobile
+"""
     path_file_order_id = working_space + "data/_2rd_data/"
     filename_order_id = "delay_days_order_id_from_credit_repay_plan_20171110.csv"
     path_file_cust_id = working_space + "data/_2rd_data/"
@@ -113,6 +138,7 @@ if __name__ == "__main__":
     getMobileByCustidByOrderid(path_file_order_id, filename_order_id,\
             path_file_cust_id, filename_cust_id,\
             path_file_mobile, filename_mobile)
+"""
 
 
 
