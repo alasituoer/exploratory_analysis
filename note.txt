@@ -11,3 +11,19 @@ del *.txt
 
 #给文件添加隐藏属性
 attrib +s +h *txt
+
+### time
+time.localtime([secs]) 将时间戳转换为当前时区的struct_time
+time.gmtime([secs]) 将一个时间戳转换为UTC时区的strcut_time
+time.time() 返回当前时间的时间戳
+time.mktime(t) 将一个struct_time转化为时间戳
+time.sleep(secs) 线程推迟指定的时间运行
+time.clock() windows上调用第一次返回进程运行的实际时间,再次调用返回上次调用到本次调用的间隔时间;unix上返回进程时间
+
+
+
+
+
+
+
+

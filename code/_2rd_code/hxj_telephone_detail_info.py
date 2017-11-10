@@ -62,22 +62,41 @@ def computeDelayDaysOfRepayPlan(path_file, filename):
     df_delay_days = df_needed[df_needed['delay_days']>=0]
     df_delay_days.to_csv(path_to_write, index=False)
 
-def getCustidByOrderid(path_file_order_id, filename_order_id,\
-        path_file_cust_id, filename_cust_id):
+def getMobileByCustidByOrderid(path_file_order_id, filename_order_id,\
+        path_file_cust_id, filename_cust_id,\
+        path_file_mobile, filename_mobile):
     """get customer id from the file cash_order_info_20171110.txt by order id"""
     print 'hello'
     df_order_id = pd.read_csv(path_file_order_id + filename_order_id)
     df_cust_id = pd.read_csv(path_file_cust_id + filename_cust_id, low_memory=False)
-    print 'order_id:', len(df_order_id)
-    print 'cust_id', len(df_cust_id[['order_id', 'cust_id',]])
+    df_mobile = pd.read_csv(path_file_mobile + filename_mobile)
+    print 'needed_order_id:', len(df_order_id)
+    print 'all_cust_id', len(df_cust_id[['order_id', 'cust_id',]])
+    print 'all_mobile:', len(df_mobile)
 
-    for i in df_order_id['order_id'][:10]:
-        print i,
-        try:
-            print df_cust_id[df_cust_id['order_id']==i]['cust_id'].values[0]
-        except Exception, e:
-            print ""
-
+    path_to_write =  path_file_order_id + "cust_id_order_id.csv"
+    with open(path_to_write, 'w') as f1:
+        for i in df_order_id['order_id']:
+            # 写入订单号
+            strings_to_write = i + ',' + str(df_order_id[df_order_id[
+                    'order_id']==i]['delay_days'].values[0]) + ','
+            # 写入客户编号
+            try:
+                cust_id = df_cust_id[df_cust_id['order_id']==i
+                    ]['cust_id'].values[0]
+                strings_to_write += str(cust_id)
+            except Exception, e:
+                strings_to_write += ''
+            strings_to_write += ','
+            # 写入客户手机号
+            try:
+                mobile = df_mobile[df_mobile['id']==cust_id
+                    ]['mobile'].values[0]
+                strings_to_write += str(mobile)
+            except Exception, e:
+                strings_to_write += ''
+            strings_to_write += '\n'
+            f1.write(strings_to_write)
 
 
 if __name__ == "__main__":
@@ -89,8 +108,11 @@ if __name__ == "__main__":
     filename_order_id = "delay_days_order_id_from_credit_repay_plan_20171110.csv"
     path_file_cust_id = working_space + "data/_2rd_data/"
     filename_cust_id = "cash_order_info_20171110.txt"
-    getCustidByOrderid(path_file_order_id, filename_order_id,\
-            path_file_cust_id, filename_cust_id)
+    path_file_mobile = working_space + "data/_2rd_data/"
+    filename_mobile = "customer_base_info_20171110.txt"
+    getMobileByCustidByOrderid(path_file_order_id, filename_order_id,\
+            path_file_cust_id, filename_cust_id,\
+            path_file_mobile, filename_mobile)
 
 
 
