@@ -132,9 +132,8 @@ def computeFinal(file_path, filename):
     #处理重复值和缺失值
     df_final.drop_duplicates(subset="order_id", keep="last", inplace=True)
     df_value = df_final[['delay_days', 'B1_VALUE']].dropna(axis=0, how='any')
-
-
     print len(df_value)
+
     #逾期时间分类
     df_value_t0 = df_value[df_value['delay_days']==0]
     df_value_t1 = df_value[df_value['delay_days']>0]
@@ -144,32 +143,55 @@ def computeFinal(file_path, filename):
     df_value_t3 = df_value[df_value['delay_days']>7]
     df_value_t3 = df_value_t3[df_value_t3['delay_days']<=14]
     df_value_t4 = df_value[df_value['delay_days']>14]
-    list_counts_diff_cates = [len(df_value_t0), len(df_value_t1),\
-            len(df_value_t2), len(df_value_t3), len(df_value_t4)]
+    #list_counts_diff_cates = [len(df_value_t0), len(df_value_t1),\
+    #        len(df_value_t2), len(df_value_t3), len(df_value_t4)]
     #print list_counts_diff_cates, sum(list_counts_diff_cates)
-    #bins = [0] + range(int(min(df_value_t0['B1_VALUE'])),\
-    #        int(max(df_value_t0['B1_VALUE'])), 5)
-    #print bins
-    #cats = pd.cut(df_value_t0['B1_VALUE'], bins, right=True)
-    #print pd.value_counts(cats)
-    
-    x = df_value[df_value['delay_days']>0]['B1_VALUE'].values
-    y = df_value[df_value['delay_days']>0]['delay_days'].values
-    plt.scatter(x, y)
-    plt.show()
 
+    #print df_value.describe()
+    desList = []
+    desList.append(df_value_t0.describe()['B1_VALUE'])
+    desList.append(df_value_t1.describe()['B1_VALUE'])
+    desList.append(df_value_t2.describe()['B1_VALUE'])
+    desList.append(df_value_t3.describe()['B1_VALUE'])
+    desList.append(df_value_t4.describe()['B1_VALUE'])
+    df_des = pd.concat(desList, axis=1)
+    df_des.columns = ['[0]', '(0, 3]', '(3, 7]', '(7, 14]', '(14, +Inf]',]
+    df_des.index.name = "B1_VALUE"
+    df_des.columns.name = "delay_days"
+    print df_des
 
-#    df_value_max = df_value.describe()['B1_VALUE'].ix['max']
-#    df_value_min = df_value.describe()['B1_VALUE'].ix['min']
-#    df_value_mean = df_value.describe()['B1_VALUE'].ix['mean']
-#    print df_value_max, df_value_min, df_value_mean
-#    print (df_value_max-df_value_min)/df_value_mean
+    # 选择分组依据
+    #bins = list(df_value['B1_VALUE'].describe().ix[3:].values)
+    #bins = [0, 100, 200, 300]
+    bins = range(df_value['B1_VALUE'].desctibe().ix['min'])
+    print u"区间选择: ", bins
+    cats_t0 = pd.cut(df_value_t0['B1_VALUE'], bins)
+    cats_t1 = pd.cut(df_value_t1['B1_VALUE'], bins)
+    cats_t2 = pd.cut(df_value_t2['B1_VALUE'], bins)
+    cats_t3 = pd.cut(df_value_t3['B1_VALUE'], bins)
+    cats_t4 = pd.cut(df_value_t4['B1_VALUE'], bins)
+    #print pd.value_counts(cats_t0)
+    #print pd.value_counts(cats_t1)
+    #print pd.value_counts(cats_t2)
+    #print pd.value_counts(cats_t3)
+    #print pd.value_counts(cats_t4)
 
-#    cats = pd.qcut(df_value['B1_VALUE'], 4)
-#    print cats['interval']
-    #print len(df_value[df_value['delay_days']==0])
-    #print len(df_value[0<df_value['delay_days']])
-
+    index_list = pd.value_counts(cats_t0).index.categories.values
+    #print index_list
+    countsList = []
+    for c in index_list:
+        tList = []
+        tList.append(pd.value_counts(cats_t0).ix[c])
+        tList.append(pd.value_counts(cats_t1).ix[c])
+        tList.append(pd.value_counts(cats_t2).ix[c])
+        tList.append(pd.value_counts(cats_t3).ix[c])
+        tList.append(pd.value_counts(cats_t4).ix[c])
+        countsList.append(tList)
+    #print countsList
+    df_counts = pd.DataFrame(countsList)
+    df_counts.index = index_list
+    df_counts.columns = df_des.columns
+    print df_counts
 
 
 """
@@ -196,12 +218,13 @@ def valueCluster():
 if __name__ == "__main__":
     working_space = "C:/Users/cherish/Desktop/exploratory_analysis/"
 
-#    valueCluster()
-
     path_file = working_space + "data/_2rd_data/"
     filename = "final_data.txt" 
     computeFinal(path_file, filename)
+
+
     
+#    valueCluster()
 
 """
     #通过mobile 在risk_ctrl_identificaiton_20171110.txt中
