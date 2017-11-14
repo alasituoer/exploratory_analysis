@@ -16,10 +16,26 @@ del *.txt
 attrib +s +h *txt
 
 ### time
+数据结构: 时间戳、格式化的时间字符串、struct_time 共9个元素的元组
+time.time() 返回当前时间的时间戳
 time.localtime([secs]) 将时间戳转换为当前时区的struct_time
 time.gmtime([secs]) 将一个时间戳转换为UTC时区的strcut_time
-time.time() 返回当前时间的时间戳
 time.mktime(t) 将一个struct_time转化为时间戳
+time.asctime([t]) 将struct_time转换为'Tue Nov 14 10:05:41 2017'格式, 参数缺省时,默认为time.localtime()
+time.ctime([secs]) 将一个时间戳转换为'Tue Nov 14 10:05:41 2017'格式,
+参数缺省时, 默认为time.time()
+time.strftime("%Y/%m/%d %X", time.localtime()) 将一个struct_time转化为格式化的时间字符串
+time.strptime("2017/11/14 10:22:19", "%Y/%m/%d %X")
+将格式化的时间字符串转为化一个struct_time的格式
+
+#日常练习
+time.time()
+time.localtime(time.time())
+time.gmtime(time.time())
+time.mktime(time.localtime(time.time()))
+time.strftime("%Y/%m/%d %X", time.localtime())
+time.strptime("2017/11/14 10:22:30", "%Y/%m/%d %X")
+
 time.sleep(secs) 线程推迟指定的时间运行
 time.clock() windows上调用第一次返回进程运行的实际时间,再次调用返回上次调用到本次调用的间隔时间;unix上返回进程时间
 
