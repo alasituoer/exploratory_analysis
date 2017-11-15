@@ -1,9 +1,20 @@
-#4
+# 
+
+#4 apply() applymap() map()的区别
+df.apply(lambda c: c.sum()) # 作用于列或者行
+df.applymap(lambda x: '%.2f' % x) # 作用于DataFrame中的每一个元素
+df['a'].map(lambda x: float(x)) # 作用于Series中的每一个元素
 
 
 #3 DataFrame 将一列分为新的多列, 并重新赋值列索引
 df_s = df['a'].str.split(',', expand=True)
 df_s.columns = ['value_' + str(i+1) for i in df_s.columns]
+# 如果列中字符串是多个数值拼接的, 拆分后还得转换成数值型才能进行计算
+df_s.applymap(lambda x: '%.2f' % float(x))
+# 将拆分后的多列追加到原DataFrame最后
+df = pd.concat([df, df_s], axis=1)
+# 看是够需要删除拆分前的那列
+#del df['a']
 
 #2 pandas DataFrame去重
 df.drop_duplicates([subset=""], keep="last", inplace=True)
