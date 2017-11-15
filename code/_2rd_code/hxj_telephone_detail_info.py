@@ -132,8 +132,25 @@ def computeFinal(file_path, filename):
     #print df_final.head(), len(df_final)
     #处理重复值和缺失值
     df_final.drop_duplicates(subset="order_id", keep="last", inplace=True)
-    df_value = df_final[['delay_days', 'D8_VALUE']].dropna(axis=0, how='any')
-    print len(df_value)
+
+    # 将C6_VALUE C7_VALUE C8_VALUE Ui_VALUE
+    # D1_VALUE D2_VALUE D3_VALUE D9_VALUE D10_VALUE
+    # D11_VALUE 根据组内元素分割
+    for v in ['C6_VALUE', 'C7_VALUE', 'C8_VALUE', 'Ui_VALUE', 
+            'D1_VALUE', 'D2_VALUE', 'D3_VALUE', 
+            'D9_VALUE', 'D10_VALUE', 'D11_VALUE',]:
+        df_split_cat = df_final[v].str.split(',', expand=True)
+        df_split_cat.columns = [v + '_' + str(i+1)\
+                for i in df_split_cat.columns]
+        #print df_split_cat
+        df_final = pd.concat([df_final, df_split_cat], axis=1)
+    #print df_final.head()
+
+
+    df_value = df_final[['delay_days',\
+            'B4_VALUE',]].replace('NA', np.nan).dropna(axis=0, how='any')
+    df_value['B4_VALUE'] = df_value['B4_VALUE'].apply(lambda x: float(x))
+    print df_value.describe()['B4_VALUE']
 
     #逾期时间分类
     df_value_t0 = df_value[df_value['delay_days']==0]
@@ -148,39 +165,38 @@ def computeFinal(file_path, filename):
     #        len(df_value_t2), len(df_value_t3), len(df_value_t4)]
     #print list_counts_diff_cates, sum(list_counts_diff_cates)
 
-    print df_value.describe()['D8_VALUE']
     desList = []
-    desList.append(df_value_t0.describe()['D8_VALUE'])
-    desList.append(df_value_t1.describe()['D8_VALUE'])
-    desList.append(df_value_t2.describe()['D8_VALUE'])
-    desList.append(df_value_t3.describe()['D8_VALUE'])
-    desList.append(df_value_t4.describe()['D8_VALUE'])
+    desList.append(df_value_t0.describe()['B4_VALUE'])
+    desList.append(df_value_t1.describe()['B4_VALUE'])
+    desList.append(df_value_t2.describe()['B4_VALUE'])
+    desList.append(df_value_t3.describe()['B4_VALUE'])
+    desList.append(df_value_t4.describe()['B4_VALUE'])
     df_des = pd.concat(desList, axis=1)
     df_des.columns = ['[0]', '(0, 3]', '(3, 7]', '(7, 14]', '(14, +Inf]',]
-    df_des.index.name = "D8_VALUE"
+    df_des.index.name = "B4_VALUE"
     df_des.columns.name = "delay_days"
     print df_des
 
     # 选择分组依据
-    #bins = list(df_value['D8_VALUE'].describe().ix[3:].values)
+    #bins = list(df_value['B4_VALUE'].describe().ix[3:].values)
     #bins = [0, 100, 200, 300]
-    value_min = df_value['D8_VALUE'].describe().ix['min']
-    value_max = df_value['D8_VALUE'].describe().ix['max']
+    value_min = df_value['B4_VALUE'].describe().ix['min']
+    value_max = df_value['B4_VALUE'].describe().ix['max']
     #value_interval = 5
     #bins = range(int(math.ceil(value_min)),\
     #        int(math.ceil(value_max)) + value_interval, value_interval)
 
     # B1 VALUE
-    value_interval = 5
-    bins = [float("-inf")] +\
-        range(120, int(math.ceil(value_max)) + value_interval, value_interval)
+    #value_interval = 5
+    #bins = [float("-inf")] +\
+    #    range(120, int(math.ceil(value_max)) + value_interval, value_interval)
 
     # B3 VALUE
     #value_interval = 200
     #bins = range(0, int(math.ceil(value_max)) + value_interval, value_interval)
 
     # B4 VALUE
-    #bins = [0, 1, 2, 10, float("inf")]
+    bins = [0, 1, 2, 10, float("inf")]
 
     # C1 VALUE
     #bins = [-1, 0, 1, 2, 3, 4, 5]
@@ -226,19 +242,72 @@ def computeFinal(file_path, filename):
     #bins = range(0, 1000 + value_interval, value_interval) + [float('inf')]
 
     # D7 VALUE
-    value_interval = 10
-    bins = range(0, 200 + value_interval, value_interval) + [float('inf')]
+    #value_interval = 10
+    #bins = range(0, 200 + value_interval, value_interval) + [float('inf')]
 
     # D8 VALUE
-    value_interval = 0.05
-    bins = [round(i, 2) for i in np.arange(0, 1.2, value_interval)] + [float('inf')]
+    #value_interval = 0.05
+    #bins = [round(i, 2) for i in np.arange(0, 1.2, value_interval)] + [float('inf')]
+
+    # D12 VALUE
+    #value_interval = 50
+    #bins = range(0, 1000 + value_interval, value_interval) + [float('inf')]
+
+    # D13 VALUE
+    #value_interval = 50
+    #bins = range(0, 1000 + value_interval, value_interval) + [float('inf')]
+
+    # D14 VALUE
+    #value_interval = 30
+    #bins = range(0, 500 + value_interval, value_interval) + [float('inf')]
+
+    # C6 VALUE_1 _2 _3 _4
+    #value_interval = 0.05
+    #bins = [float('-inf')] + [round(i, 2)\
+    #        for i in np.arange(-0.6, 1.5, value_interval)] + [float('inf')]
+
+    # C7 VALUE_1 _2 _3 _4
+    #value_interval = 15
+    #bins = range(0, 500 + value_interval, value_interval) + [float('inf')]
+
+    # C8 VALUE_1 _2 _3
+    #value_interval = 0.05
+    #bins = [float('-inf')] + [round(i, 2)\
+    #        for i in np.arange(-0.6, 1.5, value_interval)] + [float('inf')]
+
+    # Ui VALUE_1 _2 _3 _4 _5
+    #value_interval = 25
+    #bins = range(0, 500 + value_interval, value_interval) + [float('inf')]
+
+    # D1 VALUE_1 _2 _3 _4 _5
+    #bins = range(-1, 30)
+
+    # D2 VALUE_1 _2 _3 _4 _5
+    #bins = range(-1, 20)
+
+    # D3 VALUE_1 _2 _3 _4 _5
+    #bins = range(-1, 10)
+
+    # D9 VALUE_1 _2 _3 _4
+    #value_interval = 0.1
+    #bins = [float('-inf')] + [round(i, 2)\
+    #        for i in np.arange(-0.9, 1.5, value_interval)] + [float('inf')]
+
+    # D10 VALUE_1 _2 _3 _4
+    #value_interval = 25
+    #bins = range(0, 500 + value_interval, value_interval) + [float('inf')]
+
+    # D11 VALUE_1 _2 _3
+    #value_interval = 0.1
+    #bins = [float('-inf')] + [round(i, 2)\
+    #        for i in np.arange(-0.9, 1.2, value_interval)] + [float('inf')]
 
     print u"区间选择: ", bins
-    cats_t0 = pd.cut(df_value_t0['D8_VALUE'], bins, include_lowest=True)
-    cats_t1 = pd.cut(df_value_t1['D8_VALUE'], bins, include_lowest=True)
-    cats_t2 = pd.cut(df_value_t2['D8_VALUE'], bins, include_lowest=True)
-    cats_t3 = pd.cut(df_value_t3['D8_VALUE'], bins, include_lowest=True)
-    cats_t4 = pd.cut(df_value_t4['D8_VALUE'], bins, include_lowest=True)
+    cats_t0 = pd.cut(df_value_t0['B4_VALUE'], bins, include_lowest=True)
+    cats_t1 = pd.cut(df_value_t1['B4_VALUE'], bins, include_lowest=True)
+    cats_t2 = pd.cut(df_value_t2['B4_VALUE'], bins, include_lowest=True)
+    cats_t3 = pd.cut(df_value_t3['B4_VALUE'], bins, include_lowest=True)
+    cats_t4 = pd.cut(df_value_t4['B4_VALUE'], bins, include_lowest=True)
 
     index_list = pd.value_counts(cats_t0).index.categories.values
     #print index_list
@@ -257,8 +326,6 @@ def computeFinal(file_path, filename):
     df_counts.index.name = "value_interval"
     df_counts.columns = df_des.columns
     print df_counts
-
-
 
 
 
