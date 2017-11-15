@@ -1,0 +1,19 @@
+#4
+
+
+#3 DataFrame 将一列分为新的多列, 并重新赋值列索引
+df_s = df['a'].str.split(',', expand=True)
+df_s.columns = ['value_' + str(i+1) for i in df_s.columns]
+
+#2 pandas DataFrame去重
+df.drop_duplicates([subset=""], keep="last", inplace=True)
+
+#1 pandas error; C error: out of memory
+mylist = []
+for chunk in pd.read(*.csv, chunksize=20000, sep=';', low_memory=False):
+    mylist.append(chunk)
+	big_data = pd.concat(mylist, axis=0)
+del mylist
+print big_data
+
+
