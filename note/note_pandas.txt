@@ -1,4 +1,21 @@
-# 
+
+#2017/11/16-3 bokeh seaborn 可视化包
+
+#2017/11/16-2 np.random.rand() 产生随机值,各类随机值及适用范围
+
+#2017/11/16-1 使用 pandas boxplot() 画箱线图
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+np.random.seed(10)
+df = pd.DataFrame(np.random.rand(5,4))
+df.columns = ['a', 'b', 'c', 'd',]
+df.boxplot()
+plt.xlabel("columns")
+plt.ylabel("random data")
+plt.show()
+# 箱线图及其(python)定义
+
 
 #4 apply() applymap() map()的区别
 df.apply(lambda c: c.sum()) # 作用于列或者行
