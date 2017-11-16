@@ -14,7 +14,20 @@ df.boxplot()
 plt.xlabel("columns")
 plt.ylabel("random data")
 plt.show()
-# 箱线图及其(python)定义
+# 箱线图及其(python)定义_显示数据的离散分布情况
+maximum value
+75th percentile(Q3)
+50th percentile(median)
+[mean](optional)
+25th percentile(Q1)
+minimum value
+# 引入离群点的定义, 同时修改最大最小值的定义为最大最小观测值,
+# 距离四分位数值1.5个IQR = Q3-Q1（中间四分位极差）
+# min = Q1-1.5*IQR, max = Q3-1.5*IQR
+# 一、箱线图可以直观地识别数据集中的异常值
+# 二、判断数据集的数据离散程度和偏向(盒子的长度、上下间隔的形状、胡须whisker的长度)
+
+
 
 
 #4 apply() applymap() map()的区别
