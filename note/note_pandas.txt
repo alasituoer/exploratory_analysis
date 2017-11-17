@@ -1,7 +1,38 @@
 
-#2017/11/16-3 bokeh seaborn 可视化包
+#2017/11/17-3 bokeh seaborn 可视化包
 
-#2017/11/16-2 np.random.rand() 产生随机值,各类随机值及适用范围
+
+
+#2017/11/17-2 np.random中 #产生随机值,各类随机值及适用范围
+import numpy as np
+np.random.rand([d0, d1, ..., dn]) #给定任意维度生成[0, 1)间的数
+np.random.randn([d0, d1, ..., dn]) #给定任意维度生成一个或一组具有正态分布的样本
+
+np.random.randint(low, high=None, size=None, dtype='I')
+# 返回区间[low, high)之间的随机整数, high缺省时随机数范围是[0, low)
+
+np.random.random_integers(low, high=None, size=None)
+# 与np.random.randint()类似, high缺省时随机数范围[1, low)
+
+#生成[0, 1)之间的浮点数, 参数为size=(3,2)元组时用于指定多个维度
+np.random.random_sample(size=None)
+np.random.random(size=None)
+np.random.sample(size=None)
+np.random.ranf(size=None)
+
+np.random.choice(a, size=None, replace=True,  p=None)
+# 从给定的一维数组a中选择, 若a为整数, 则对应的数组为np.arange(a)
+# replace=True 是允许随机数重复
+# p为指定随机取数时数组内各数据出现的概率, 所有p值之和应为1
+
+# 设置相同的seed, 则每次生成的随机数相同
+np.random.seed(10)
+np.random.ranf()
+output: 0.771320643266746
+np.random.seed(10)
+np.random.ranf()
+output: 0.771320643266746
+
 
 #2017/11/16-1 使用 pandas boxplot() 画箱线图
 import pandas as pd
@@ -14,6 +45,7 @@ df.boxplot()
 plt.xlabel("columns")
 plt.ylabel("random data")
 plt.show()
+
 # 箱线图及其(python)定义_显示数据的离散分布情况
 maximum value
 75th percentile(Q3)
@@ -22,12 +54,13 @@ maximum value
 25th percentile(Q1)
 minimum value
 # 引入离群点的定义, 同时修改最大最小值的定义为最大最小观测值,
-# 距离四分位数值1.5个IQR = Q3-Q1（中间四分位极差）
-# min = Q1-1.5*IQR, max = Q3-1.5*IQR
+# 距离四分位数值1.5个IQR = Q3-Q1（中间或上下四分位极差）
+# min = Q1-1.5*IQR, max = Q3+1.5*IQR
+# 小于最小观测值min和大于最大观测值max的部分，称为异常值
+# 超过四分位极差3倍距离的异常值称为极端异常值, 超出1.5到3倍的称为较温和的异常值
+
 # 一、箱线图可以直观地识别数据集中的异常值
 # 二、判断数据集的数据离散程度和偏向(盒子的长度、上下间隔的形状、胡须whisker的长度)
-
-
 
 
 #4 apply() applymap() map()的区别
