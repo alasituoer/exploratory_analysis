@@ -7,7 +7,10 @@ if __name__ == "__main__":
     working_space = "C:/Users/Administrator/Desktop/exploratory_analysis/"
     path_file = working_space + "data/dataset_score_card/"
 
-    testSklearn()
+    filename_loan_nop2p = "loan_nop2p_dataset.txt"
+    t_cluster(path_file + "cleaned_full_data/", filename_loan_nop2p)
+
+    #testSklearn()
 
     #filename = "BC.csv"
     #df = pd.read_csv(path_file + filename)

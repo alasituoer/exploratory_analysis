@@ -2,6 +2,11 @@
 import numpy as np
 import pandas as pd
 
+def t_cluster(path_file, filename):
+    df = pd.read_csv(path_file + filename)
+    print df.head(n=10)
+    print "J"
+
 def testSklearn():
     # imput sample data
     from sklearn.datasets import load_iris
@@ -12,9 +17,10 @@ def testSklearn():
     #data = iris.target
     #print data.reshape((-1, 1))
 
+
     from sklearn.preprocessing import Imputer
-    imputer = Imputer()
-    print imputer.fit_transform(np.vstack(((np.array([np.nan]*4)), data)))
+    #imputer = Imputer()
+    #print imputer.fit_transform(np.vstack(((np.array([np.nan]*4)), data)))
     #imputer.fit_transform()
 
 
