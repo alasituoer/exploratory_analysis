@@ -4,21 +4,81 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import Normalizer
+from sklearn.decomposition import PCA
+from sklearn.feature_selection import SelectKBest
+from sklearn.ensemble import ExtraTreesClassifier
+
 
 #from data import removed_list
 from data import removed_list
 from data import qualitative_variables_list
-#from data import fillna_list
+from data import tel_detail_info_index_list
+
+def pcaTelDetailInfo(df_tel_detail_info):
+    df_tel_detail_info.fillna(df_tel_detail_info.mean(), inplace=True)
+    array_tel_detail_info = df_tel_detail_info.values
+    array_std_detail_info = Normalizer().fit_transform(array_tel_detail_info)
+    #print array_tel_detail_info.shape
+    #print array_tel_detail_info
+    print array_std_detail_info.shape
+    #print array_std_detail_info
+
+    pca = PCA(n_components='mle')
+    #pca = PCA(n_components=5)
+    print pca.fit_transform(array_std_detail_info)
+    #print pca.components_
+#    print 'explained_variance_ratio_', pca.explained_variance_ratio_#.sum()
+    #print 'explained_variance_', pca.explained_variance_
+    print 'n_components', pca.n_components_
+
+def selectTelDetailInfo(df_tel_detail_info):
+    df_tel_detail_info.fillna(df_tel_detail_info.mean(), inplace=True)
+    y = df_tel_detail_info['ovd_daynum'].values
+    y = y.reshape(len(y),1)
+    del df_tel_detail_info['ovd_daynum']
+    X = df_tel_detail_info.values
+    stded_x = Normalizer().fit_transform(X)
+    stded_y = Normalizer().fit_transform(y)
+
+    #print stded_x.shape
+    #print stded_x
+    #print stded_y.shape
+    #print stded_y
+    #x_new = SelectKBest().fit_transform(stded_x, stded_y)
+    #print x_new.shape
+    #print x_new
+
+    clf = ExtraTreesClassifier()
+    clf.fit(stded_x, stded_y.ravel())
+    print clf.feature_importances_
+#    print clf.decision_path(stded_x)
+
+
 
 if __name__ == "__main__":
     working_space = "/mnt/hgfs/windows_desktop/exploratory_analysis/" +\
 		      "data/dataset_score_card/cleaned_full_data/test/"
     filename = "coll_dataset2_test.txt"
+    #filename = "coll_dataset2.txt"
+
     df = pd.read_csv(working_space + filename, index_col=0)
     list_df_columns = list(df.columns)
     for i in removed_list:
 	list_df_columns.remove(i)
     df = df[list_df_columns]
+
+    df_tel_detail_info = df[['ovd_daynum'] + tel_detail_info_index_list]
+    selectTelDetailInfo(df_tel_detail_info)
+
+    #df_tel_detail_info = df[tel_detail_info_index_list]
+    #pcaTelDetailInfo(df_tel_detail_info)
+
+
+
+
+
+def tryScalerData(filename):
+
 #    print df.head()
 #    print df.describe()
 
