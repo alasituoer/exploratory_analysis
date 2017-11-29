@@ -2,11 +2,12 @@
 import pandas as pd
 
 from data import removed_list
-from data import qualitative_variables_list
 from data import tel_detail_info_index_list
+from data import cust_app_3rd_index_list
 
 from func import pcaTelDetailInfo
 from func import selectTelDetailInfo
+from func import selectCustApp3rd
 
 
 
@@ -23,13 +24,20 @@ if __name__ == "__main__":
 	list_df_columns.remove(i)
     df = df[list_df_columns]
 
-    # 对电话详单部分筛选变量
-    df_tel_detail_info = df[['ovd_daynum'] + tel_detail_info_index_list]
-    df_tel_detail_info = df_tel_detail_info.dropna(axis=0, how='any')
-    df_tel_detail_info.applymap(lambda x: float(x))
+    #2 客户基本信息+app+3rd
+    df_cust_app_3rd = df[['ovd_daynum'] + cust_app_3rd_index_list]
+    #print df_cust_app_3rd.describe()
+    df_cust_app_3rd = df_cust_app_3rd.fillna(0)
+    selectCustApp3rd(df_cust_app_3rd)
+
+
+    #1 对电话详单部分筛选变量
+    #df_tel_detail_info = df[['ovd_daynum'] + tel_detail_info_index_list]
+    #df_tel_detail_info = df_tel_detail_info.dropna(axis=0, how='any')
+    #df_tel_detail_info.applymap(lambda x: float(x))
     #print df_tel_detail_info.describe()
     #print df_tel_detail_info.head()
-    selectTelDetailInfo(df_tel_detail_info)
+    #selectTelDetailInfo(df_tel_detail_info)
 
     # 对电话详单样本数据做主成份分析
     #df_tel_detail_info = df[tel_detail_info_index_list]

@@ -6,7 +6,7 @@ removed_list = ['cust_id', 'phone_no', 'id_no', 'name',
 	     'repayment_type', 'pay_channel', 'created_by', 'created_time',
 	     'last_modified_by', 'last_modified_time', 'upd_dt', 'order_source',
 	     'st_date', 'min_date', 'now_city_code', 'work_area',
-	     'is_sms', 'is_contacts', 'refuseMessage', 'last_usetime_cha',]
+	     'is_sms', 'is_contacts', 'refuseMessage',]
 
 # 需编码的定性指标(橙色)
 qualitative_variables_list =\
@@ -16,7 +16,8 @@ qualitative_variables_list =\
 encoded_qual_var_list =\
 	['status', 'id_type', 'reason_code', 'realname',\
 	'address_contact', 'coll_result',]
-encoded_qual_var_list = encoded_qual_var_list +\
+# 客户地址信息
+cust_address_list =\
         ['live_city.now_city', 'live_city.work_city', 'live_city.id_city',
         'live_city.mobile_city', 'live_city.ec1_city', 'live_city.ec2_city',
         'live_city.bk_mob_city',
@@ -46,6 +47,21 @@ encoded_qual_var_list = encoded_qual_var_list +\
         'work_area.live_area', 'work_area.now_area', 'work_area.id_area',
         'id_area.live_area', 'id_area.now_area', 'id_area.work_area',]
 
+# 客户基本信息+app+第三方有效指标
+cust_app_3rd_index_list =\
+	['face_compare', 'zhima_score', 'age', 'institu_amt', 'bnk_amt', 
+	'cnss_amt', 'p2p_amt', 'query_amt', 'query_amt_m3', 'query_amt_m6', 
+	'dialing_count', 'called_count', 'contact_count', 'black_circle_count', 
+	'e5_value_count', 'calllog_trad_count', 'collection_count', 
+	'public_organ_count', 'dialing_one', 'address_black_count', 
+	'address_collection_count', 'sms_fail_count', 'phoneToptenCount', 
+	'address_count', 'apply_fail_count2', 'trade_register_count', 
+	'last_usetime_cha',]
+seleted_cust_app_3rd_index_list = []
+
+
+
+# 电话详单有效指标
 tel_detail_info_index_list = \
 	['I11_1', 'I11_2', 'I11_3', 'I11_4', 'I11_5',
 	'C1', 'C2', 'C3', 'C4', 'C5',
@@ -74,6 +90,15 @@ tel_detail_info_index_list = \
 	'I1_1', 'I1_2', 'I1_3', 'I1_4', 'I1_5',
 	'I2_1', 'I2_2', 'I2_3', 'I2_4', 'I2_5',
 	'I3', 'I4', 'I5',]
+# 拟选择的特征
+seleted_index_tel_detail_info_list =\
+	['D1_1', 'D1_2', 'D1_3', 'D1_4', 'D1_5',
+	'D7', 'D14', 'F8_1', 'F8_2', 'F8_3', 'F8_4',
+	'F9_1', 'F9_2', 'F9_3', 'F9_4', 'F9_5',
+	'I1_1', 'I1_2', 'I1_3', 'I4', 'I5',]
+
+
+
 
 
 
