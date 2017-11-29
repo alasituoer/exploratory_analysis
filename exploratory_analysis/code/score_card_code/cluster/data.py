@@ -47,6 +47,13 @@ cust_address_list =\
         'work_area.live_area', 'work_area.now_area', 'work_area.id_area',
         'id_area.live_area', 'id_area.now_area', 'id_area.work_area',]
 
+# 订单有效指标
+order_index_list =\
+	['amount', 'term', 'rate', 'service_fee', 'payment_amount',]
+selected_order_index_list = []
+
+
+
 # 客户基本信息+app+第三方有效指标
 cust_app_3rd_index_list =\
 	['face_compare', 'zhima_score', 'age', 'institu_amt', 'bnk_amt', 
@@ -57,7 +64,12 @@ cust_app_3rd_index_list =\
 	'address_collection_count', 'sms_fail_count', 'phoneToptenCount', 
 	'address_count', 'apply_fail_count2', 'trade_register_count', 
 	'last_usetime_cha',]
-seleted_cust_app_3rd_index_list = []
+#拟选择特征(客户基本信息+app+第三方信息)
+seleted_cust_app_3rd_index_list =\
+	['face_compare', 'age', 'address_count', 'last_usetime_cha', 
+	'trade_register_count', 'zhima_score', 'called_count',
+	'dialing_count', 'contact_count', 'calllog_trad_count',
+	'address_black_count']
 
 
 

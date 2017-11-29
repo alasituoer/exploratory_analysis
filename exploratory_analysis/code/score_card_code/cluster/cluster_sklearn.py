@@ -4,10 +4,12 @@ import pandas as pd
 from data import removed_list
 from data import tel_detail_info_index_list
 from data import cust_app_3rd_index_list
+from data import order_info_index_list
 
 from func import pcaTelDetailInfo
 from func import selectTelDetailInfo
 from func import selectCustApp3rd
+from func import selectOrderInfo
 
 
 
@@ -23,12 +25,17 @@ if __name__ == "__main__":
     for i in removed_list:
 	list_df_columns.remove(i)
     df = df[list_df_columns]
+    
+    #3 
+
+
+
 
     #2 客户基本信息+app+3rd
-    df_cust_app_3rd = df[['ovd_daynum'] + cust_app_3rd_index_list]
+    #df_cust_app_3rd = df[['ovd_daynum'] + cust_app_3rd_index_list]
     #print df_cust_app_3rd.describe()
-    df_cust_app_3rd = df_cust_app_3rd.fillna(0)
-    selectCustApp3rd(df_cust_app_3rd)
+    #df_cust_app_3rd = df_cust_app_3rd.fillna(0)
+    #selectCustApp3rd(df_cust_app_3rd)
 
 
     #1 对电话详单部分筛选变量
