@@ -48,9 +48,9 @@ cust_address_list =\
         'id_area.live_area', 'id_area.now_area', 'id_area.work_area',]
 
 # 订单有效指标
-order_index_list =\
+order_info_index_list =\
 	['amount', 'term', 'rate', 'service_fee', 'payment_amount',]
-selected_order_index_list = []
+selected_order_info_index_list = ['payment_amount']
 
 
 

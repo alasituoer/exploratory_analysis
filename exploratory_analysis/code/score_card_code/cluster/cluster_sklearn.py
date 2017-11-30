@@ -5,11 +5,15 @@ from data import removed_list
 from data import tel_detail_info_index_list
 from data import cust_app_3rd_index_list
 from data import order_info_index_list
+from data import selected_tel_detail_info_index_list
+from data import selected_cust_app_3rd_index_list
+from data import selected_order_info_index_list
 
 from func import pcaTelDetailInfo
 from func import selectTelDetailInfo
 from func import selectCustApp3rd
 from func import selectOrderInfo
+from func import clusterSelectedIndex
 
 
 
@@ -26,9 +30,16 @@ if __name__ == "__main__":
 	list_df_columns.remove(i)
     df = df[list_df_columns]
     
-    #3 
+    # 
 
 
+
+
+
+    #3 订单信息
+    #df_order_info = df[['ovd_daynum'] + order_info_index_list]
+    #print df_order_info.describe()
+    #selectOrderInfo(df_order_info)
 
 
     #2 客户基本信息+app+3rd
