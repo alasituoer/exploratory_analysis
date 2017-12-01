@@ -65,7 +65,7 @@ cust_app_3rd_index_list =\
 	'address_count', 'apply_fail_count2', 'trade_register_count', 
 	'last_usetime_cha',]
 #拟选择特征(客户基本信息+app+第三方信息)
-seleted_cust_app_3rd_index_list =\
+selected_cust_app_3rd_index_list =\
 	['face_compare', 'age', 'address_count', 'last_usetime_cha', 
 	'trade_register_count', 'zhima_score', 'called_count',
 	'dialing_count', 'contact_count', 'calllog_trad_count',
@@ -103,7 +103,7 @@ tel_detail_info_index_list = \
 	'I2_1', 'I2_2', 'I2_3', 'I2_4', 'I2_5',
 	'I3', 'I4', 'I5',]
 # 拟选择的特征
-seleted_index_tel_detail_info_list =\
+selected_tel_detail_info_index_list =\
 	['D1_1', 'D1_2', 'D1_3', 'D1_4', 'D1_5',
 	'D7', 'D14', 'F8_1', 'F8_2', 'F8_3', 'F8_4',
 	'F9_1', 'F9_2', 'F9_3', 'F9_4', 'F9_5',

@@ -9,7 +9,7 @@ from data import selected_tel_detail_info_index_list
 from data import selected_cust_app_3rd_index_list
 from data import selected_order_info_index_list
 
-from func import pcaTelDetailInfo
+#from func import pcaTelDetailInfo
 from func import selectTelDetailInfo
 from func import selectCustApp3rd
 from func import selectOrderInfo
@@ -31,7 +31,12 @@ if __name__ == "__main__":
     df = df[list_df_columns]
     
     # 
-
+    selected_index_list = selected_tel_detail_info_index_list +\
+	    selected_cust_app_3rd_index_list + \
+	    selected_order_info_index_list
+    #print selected_index_list
+    df_selected_index = df[['ovd_daynum'] + selected_index_list]
+    clusterSelectedIndex(df_selected_index) 
 
 
 
