@@ -1,5 +1,8 @@
 #coding:utf-8
+import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import Normalizer
 #from sklearn.feature_selection import VarianceThreshold
@@ -7,30 +10,87 @@ from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
 
+
 def clusterSelectedIndex(df_selected_index):
-    df_selected_index = df_selected_index.dropna(axis=0, how='any')
-    #df_selected_index.fillna(df_selected_index.mean(), inplace=True)
-    #print df_selected_index.describe()
-    X = df_selected_index.values
+#    print df_selected_index.describe()
+    y = df_selected_index['ovd_daynum'][:200].values
+    y = y.reshape(len(y),1)
+    del df_selected_index['ovd_daynum']
+
+    X = df_selected_index[:200].values
     scaled_x = Normalizer().fit_transform(X)
     #print scaled_x.shape
+    X_tsne = TSNE(learning_rate=100).fit_transform(X)
+    print X_tsne
 
-    df_raw = pd.DataFrame(X, columns=[x+'_raw' for x in df_selected_index.columns])
-    df_scaled = pd.DataFrame(scaled_x, columns=df_selected_index.columns)
-    df_one_var = pd.concat([df_raw['ovd_daynum_raw'], df_scaled['ovd_daynum']], axis=1)
-    #print df_one_var.describe()    
-    #print df_one_var[df_one_var['ovd_daynum_raw']==58]
-    
-    k = 4
+    #plt.figure(figsize=(10, 5))
+    #plt.scatter(X_tsne[:, 0], X_tsne[:, 1])
+    #plt.show()
+
+"""
+    k = 10
     iteration = 500
     model = KMeans(n_clusters=k, n_jobs=4, max_iter=iteration)
     model.fit(scaled_x)
     print pd.Series(model.labels_).value_counts()
     print pd.DataFrame(model.cluster_centers_)
+"""
 
 
+
+def ivSelectedIndex(path_file, filename1, filename2):
+    import woe.config as config
+    import woe.feature_process as fp
+    import woe.eval as eval
+
+    data_path = path_file + filename1
+    config_path = path_file + filename2
+    cfg = config.config()
+    cfg.load_file(config_path, data_path)
+    
+    # target ? 求IV值要先定义好坏样本, 由好坏比例求WOE
+    #print type(cfg.dataset_train)
+    print cfg.dataset_train.head()
+    #print type(cfg.bin_var_list)
+    
+    """
+    for var in cfg.bin_var_list:
+        # fill null
+        cfg.dataset_train.loc[cfg.dataset_train[var].isnull(), (var)] = 0
+    
+    # change feature dtypes
+    fp.change_feature_dtype(cfg.dataset_train, cfg.variable_type)
+    
+    #print cfg.variable_type
+    #print cfg.dataset_train.head()
+    
+    rst = []
+    
+    # process woe transformation of continuous variables
+    for var in cfg.bin_var_list[:3]:
+        rst.append(fp.proc_woe_continuous(cfg.dataset_train,var,cfg.global_bt,cfg.global_gt,cfg.min_sample,alpha=0.05))
+    
+    # process woe transformation of discrete variables
+    for var in cfg.discrete_var_list:
+        # fill null
+        cfg.dataset_train.loc[cfg.dataset_train[var].isnull(), (var)] = 'missing'
+        rst.append(fp.proc_woe_discrete(cfg.dataset_train,var,cfg.global_bt,cfg.global_gt,cfg.min_sample,alpha=0.05))
+    
+    feature_detail = eval.eval_feature_detail(rst,'output_feature_detail.csv')
+    """
+
+
+
+# 订单信息
 def selectOrderInfo(df_order_info):
     #print df_order_info.describe()
+
+    #df_corr = df_order_info.corr()
+    #df_corr_t1 = df_corr[df_corr>=0.8].replace(1.0, np.nan)
+    #df_corr_t1.dropna(axis=0, how='all', inplace=True)
+    #df_corr_t1.dropna(axis=1, how='all', inplace=True)
+    #print df_corr_t1
+    
     y = df_order_info['ovd_daynum'].values
     y = y.reshape(len(y),1)
     del df_order_info['ovd_daynum']
@@ -72,8 +132,16 @@ def selectOrderInfo(df_order_info):
     print [x[0] for x in list_selected_index]
 
 
+# 客户基本信息 APP信息 第三方信息
 def selectCustApp3rd(df_cust_app_3rd):
-#    print len(df_cust_app_3rd.columns)
+    #print df_cust_app_3rd.describe()
+
+    #df_corr = df_cust_app_3rd.corr()
+    #df_corr_t1 = df_corr[df_corr>0.8].replace(1.0, np.nan)
+    #df_corr_t1.dropna(axis=0, how='all', inplace=True)
+    #df_corr_t1.dropna(axis=1, how='all', inplace=True)
+    #print df_corr_t1
+
     y = df_cust_app_3rd['ovd_daynum'].values
     y = y.reshape(len(y),1)
     del df_cust_app_3rd['ovd_daynum']
@@ -117,7 +185,17 @@ def selectCustApp3rd(df_cust_app_3rd):
 
 
 
+# 电话详单
 def selectTelDetailInfo(df_tel_detail_info):
+    #print df_tel_detail_info.describe()
+
+    # 筛选高度共线性变量
+    #df_corr = df_tel_detail_info.corr()
+    #df_corr_t1 = df_corr[df_corr>=0.8].replace(1.0, np.nan)
+    #df_corr_t1.dropna(axis=0, how='all', inplace=True)
+    #df_corr_t1.dropna(axis=1, how='all', inplace=True)
+    #print df_corr_t1
+
     y = df_tel_detail_info['ovd_daynum'].values
     y = y.reshape(len(y),1)
     del df_tel_detail_info['ovd_daynum']
@@ -158,7 +236,6 @@ def selectTelDetailInfo(df_tel_detail_info):
     dict_index_appear = sorted(dict_index_appear.iteritems(),\
 	    key=lambda t:t[1], reverse=True)
     print [x for x in dict_index_appear if x[1] > iter_num/2]
-
 
 
 

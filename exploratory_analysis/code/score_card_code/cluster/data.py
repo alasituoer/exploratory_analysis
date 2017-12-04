@@ -50,7 +50,10 @@ cust_address_list =\
 # 订单有效指标
 order_info_index_list =\
 	['amount', 'term', 'rate', 'service_fee', 'payment_amount',]
-selected_order_info_index_list = ['payment_amount']
+corr_order_info_index_list =\
+	['amount' , #payment_amount
+	'rate', ] #term
+selected_order_info_index_list = ['payment_amount', 'term', 'service_fee',]
 
 
 
@@ -64,13 +67,14 @@ cust_app_3rd_index_list =\
 	'address_collection_count', 'sms_fail_count', 'phoneToptenCount', 
 	'address_count', 'apply_fail_count2', 'trade_register_count', 
 	'last_usetime_cha',]
+corr_cust_app_3rd_index_list =\
+	['cnss_amt', 'p2p_amt', 'query_amt', 'query_amt_m3', 'query_amt_m6',]#institu_amt
 #拟选择特征(客户基本信息+app+第三方信息)
 selected_cust_app_3rd_index_list =\
 	['face_compare', 'age', 'address_count', 'last_usetime_cha', 
 	'trade_register_count', 'zhima_score', 'called_count',
 	'dialing_count', 'contact_count', 'calllog_trad_count',
 	'address_black_count']
-
 
 
 # 电话详单有效指标
@@ -102,13 +106,35 @@ tel_detail_info_index_list = \
 	'I1_1', 'I1_2', 'I1_3', 'I1_4', 'I1_5',
 	'I2_1', 'I2_2', 'I2_3', 'I2_4', 'I2_5',
 	'I3', 'I4', 'I5',]
+corr_tel_detail_info_index_list =\
+    ['I11_2', 'I11_3', 'I11_4', 'I11_5', 'C2',#C3
+    'C7_1', 'C7_2', 'C7_3', 'C7_4', 'C9', 'C10',
+
+    'U1', 'U2', 'U3', 'U4', 'U5', 'D5', 'D6', 'D10_1',#F2
+    'D10_2', 'D10_3', 'D10_4', 'D12', 'D13', 'E1_1',
+    'E1_2', 'E1_3', 'E1_4', 'E1_5', 'F1',
+    
+    'C11', #C4
+    'D14', #D7
+    'I5',] #I4
+
+
 # 拟选择的特征
 selected_tel_detail_info_index_list =\
-	['D1_1', 'D1_2', 'D1_3', 'D1_4', 'D1_5',
-	'D7', 'D14', 'F8_1', 'F8_2', 'F8_3', 'F8_4',
-	'F9_1', 'F9_2', 'F9_3', 'F9_4', 'F9_5',
-	'I1_1', 'I1_2', 'I1_3', 'I4', 'I5',]
+	['D7', 'I4', 'F8_1', 'F9_1',
+	'D1_1', 'D1_2', 'D1_3', 'D1_4', 'D1_5',
+	'I1_1', 'I1_2', 'I1_3', 'I1_4', 'I1_5',
+	'E3_1', 'E3_2', 'E3_3',]
 
+
+"""
+	['D1_1', 'D1_2', 'D1_3', 'D1_4', 'D1_5',
+	'D7', 'D14',
+	'F8_1', 'F8_2', 'F8_3', 'F8_4',
+	'F9_1', 'F9_2', 'F9_3', 'F9_4', 'F9_5',
+	'I1_1', 'I1_2', 'I1_3',
+	'I4', 'I5',]
+"""
 
 
 
