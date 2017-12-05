@@ -21,6 +21,7 @@ from func import selectCustApp3rd
 from func import selectOrderInfo
 from func import clusterSelectedIndex
 from func import ivSelectedIndex
+from func import rfeSelectedIndex
 
 
 
@@ -38,16 +39,21 @@ if __name__ == "__main__":
     df = df[list_df_columns]
 
     # 对样本聚类分析
-    selected_index_list = selected_tel_detail_info_index_list +\
-	    selected_cust_app_3rd_index_list + \
-	    selected_order_info_index_list
-    #print selected_index_list
-    df_selected_index = df[['ovd_daynum'] + selected_index_list]
+#    selected_index_list = selected_tel_detail_info_index_list +\
+#	    selected_cust_app_3rd_index_list + \
+#	    selected_order_info_index_list
+#    #print selected_index_list
+#    df_selected_index = df[['ovd_daynum'] + selected_index_list]
+#
+#    df_selected_index[selected_cust_app_3rd_index_list].fillna(0)
+#    df_selected_index = df_selected_index.dropna(axis=0, how='any')
+#    df_selected_index.applymap(lambda x: float(x))
+#    
+#    clusterSelectedIndex(df_selected_index) 
 
-    df_selected_index[selected_cust_app_3rd_index_list].fillna(0)
-    df_selected_index = df_selected_index.dropna(axis=0, how='any')
-    df_selected_index.applymap(lambda x: float(x))
-    clusterSelectedIndex(df_selected_index) 
+
+    # RFECV select features, 事先已知各样对应的分类结果
+    #rfeSelectedIndex(df_selected_index)
 
 
     # 计算多变量的IV值
@@ -81,16 +87,16 @@ if __name__ == "__main__":
 
 
     #1 对电话详单部分筛选变量
-    #print len(tel_detail_info_index_list)
-    #print len(corr_tel_detail_info_index_list)
-    #tel_detail_info_index_list = [x for x in tel_detail_info_index_list\
+#    print len(tel_detail_info_index_list)
+    #print corr_tel_detail_info_index_list
+#    tel_detail_info_index_list = [x for x in tel_detail_info_index_list\
 #	    if x not in corr_tel_detail_info_index_list]
-    #print len(tel_detail_info_index_list)
+#    print len(tel_detail_info_index_list)
 
-    #df_tel_detail_info = df[['ovd_daynum'] + tel_detail_info_index_list]
-    #df_tel_detail_info = df_tel_detail_info.dropna(axis=0, how='any')
-    #df_tel_detail_info.applymap(lambda x: float(x))
-    #selectTelDetailInfo(df_tel_detail_info)
+    df_tel_detail_info = df[['ovd_daynum'] + tel_detail_info_index_list]
+    df_tel_detail_info = df_tel_detail_info.dropna(axis=0, how='any')
+    df_tel_detail_info.applymap(lambda x: float(x))
+    selectTelDetailInfo(df_tel_detail_info)
 
     # 对电话详单样本数据做主成份分析
     #df_tel_detail_info = df[tel_detail_info_index_list]

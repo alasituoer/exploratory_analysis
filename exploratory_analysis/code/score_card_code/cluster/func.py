@@ -5,36 +5,77 @@ import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import Normalizer
-#from sklearn.feature_selection import VarianceThreshold
+from sklearn.preprocessing import StandardScaler
+from sklearn.feature_selection import VarianceThreshold
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
+from sklearn.svm import SVC
+from sklearn.model_selection import StratifiedKFold
+from sklearn.feature_selection import RFECV
+import matplotlib.pyplot as plt
 
 
 def clusterSelectedIndex(df_selected_index):
+    df_selected_index = df_selected_index.drop(
+	    ['service_fee', 'address_count', 'face_compare', 
+	    'last_usetime_cha', 'trade_register_count',
+	    'I1_4', 'I1_5',], axis=1)
+
+    
 #    print df_selected_index.describe()
-    y = df_selected_index['ovd_daynum'][:200].values
-    y = y.reshape(len(y),1)
-    del df_selected_index['ovd_daynum']
+    X = df_selected_index[:5000].values
+    #scaled_x = Normalizer().fit_transform(X)
+    scaled_x = StandardScaler().fit_transform(X)
 
-    X = df_selected_index[:200].values
-    scaled_x = Normalizer().fit_transform(X)
-    #print scaled_x.shape
-    X_tsne = TSNE(learning_rate=100).fit_transform(X)
-    print X_tsne
-
-    #plt.figure(figsize=(10, 5))
-    #plt.scatter(X_tsne[:, 0], X_tsne[:, 1])
-    #plt.show()
-
-"""
-    k = 10
+    k = 3
     iteration = 500
     model = KMeans(n_clusters=k, n_jobs=4, max_iter=iteration)
-    model.fit(scaled_x)
+    y_pred = model.fit_predict(scaled_x)
     print pd.Series(model.labels_).value_counts()
     print pd.DataFrame(model.cluster_centers_)
+    #print y_pred
+
+    # 循环特征消除法 选择特征变量
+    svc = SVC(kernel="linear")
+    rfecv = RFECV(estimator=svc, step=1,\
+		cv=StratifiedKFold(2), scoring="accuracy")
+    rfecv.fit(scaled_x, y_pred)
+    print rfecv.n_features_
+    print rfecv.support_
+    print sorted(zip(rfecv.ranking_, df_selected_index.columns))
+
+    X_tsne = TSNE(learning_rate=100).fit_transform(scaled_x)
+    plt.figure(figsize=(10, 5))
+    plt.scatter(X_tsne[:,0], X_tsne[:, 1], c=y_pred)
+    plt.show()
+
+
+def rfeSelectedIndex(df_selected_index):
+
+    # 按照逾期天数分类: 0, 1-3, 4-7, 8-14, 15-30, 31+
+    print df_selected_index.loc[df_selected_index['ovd_daynum'] in range(1, 4)].head()
+
 """
+    #print df_selected_index.head()
+    arr_selected_index = df_selected_index.values
+    scaled_selected_index = Normalizer().fit_transform(arr_selected_index)
+    X = scaled_selected_index[:1000, 1:]
+    y = scaled_selected_index[:1000, 0]
+    y = y.reshape(len(y), 1)
+    #print scaled_selected_index[:5,:]
+    #print X[:5, :], y[:5, :]
+
+    svc = SVC(kernel="linear")
+    rfecv = RFECV(estimator=svc, step=1,\
+		cv=StratifiedKFold(2), scoring="accuracy")
+    rfecv.fit(X, y)
+    print rfecv.n_features_
+    print rfecv.support_
+    print rfecv.ranking_
+
+"""
+
 
 
 
@@ -190,12 +231,13 @@ def selectTelDetailInfo(df_tel_detail_info):
     #print df_tel_detail_info.describe()
 
     # 筛选高度共线性变量
-    #df_corr = df_tel_detail_info.corr()
-    #df_corr_t1 = df_corr[df_corr>=0.8].replace(1.0, np.nan)
-    #df_corr_t1.dropna(axis=0, how='all', inplace=True)
-    #df_corr_t1.dropna(axis=1, how='all', inplace=True)
-    #print df_corr_t1
+    df_corr = df_tel_detail_info.corr()
+    df_corr_t1 = df_corr[df_corr>=0.8].replace(1.0, np.nan)
+    df_corr_t1.dropna(axis=0, how='all', inplace=True)
+    df_corr_t1.dropna(axis=1, how='all', inplace=True)
+    print df_corr_t1
 
+"""
     y = df_tel_detail_info['ovd_daynum'].values
     y = y.reshape(len(y),1)
     del df_tel_detail_info['ovd_daynum']
@@ -236,8 +278,7 @@ def selectTelDetailInfo(df_tel_detail_info):
     dict_index_appear = sorted(dict_index_appear.iteritems(),\
 	    key=lambda t:t[1], reverse=True)
     print [x for x in dict_index_appear if x[1] > iter_num/2]
-
-
+"""
 
 
 
