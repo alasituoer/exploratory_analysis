@@ -1,4 +1,5 @@
 #coding:utf-8
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -15,12 +16,10 @@ from data import selected_tel_detail_info_index_list
 from data import selected_cust_app_3rd_index_list
 from data import selected_order_info_index_list
 
-#from func import pcaTelDetailInfo
 from func import selectTelDetailInfo
 from func import selectCustApp3rd
 from func import selectOrderInfo
 from func import clusterSelectedIndex
-from func import ivSelectedIndex
 from func import rfeSelectedIndex
 
 
@@ -34,9 +33,11 @@ if __name__ == "__main__":
     # DataFrame预处理
     df = pd.read_csv(working_space + filename, index_col=0)
     list_df_columns = list(df.columns)
+    # 去除认定不需要的变量
     for i in removed_list:
 	list_df_columns.remove(i)
     df = df[list_df_columns]
+    #print df.head()
 
     # 对样本聚类分析
 #    selected_index_list = selected_tel_detail_info_index_list +\
@@ -87,11 +88,11 @@ if __name__ == "__main__":
 
 
     #1 对电话详单部分筛选变量
-#    print len(tel_detail_info_index_list)
+    #print len(tel_detail_info_index_list)
     #print corr_tel_detail_info_index_list
-#    tel_detail_info_index_list = [x for x in tel_detail_info_index_list\
-#	    if x not in corr_tel_detail_info_index_list]
-#    print len(tel_detail_info_index_list)
+    tel_detail_info_index_list = [x for x in tel_detail_info_index_list\
+	    if x not in corr_tel_detail_info_index_list]
+    #print len(tel_detail_info_index_list)
 
     df_tel_detail_info = df[['ovd_daynum'] + tel_detail_info_index_list]
     df_tel_detail_info = df_tel_detail_info.dropna(axis=0, how='any')

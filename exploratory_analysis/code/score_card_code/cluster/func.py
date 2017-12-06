@@ -3,16 +3,22 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+#from sklearn.feature_selection import VarianceThreshold
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MaxAbsScaler
 from sklearn.preprocessing import Normalizer
 from sklearn.preprocessing import StandardScaler
-from sklearn.feature_selection import VarianceThreshold
+
 from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import RandomizedLasso
+
+
 from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
-from sklearn.svm import SVC
 from sklearn.model_selection import StratifiedKFold
 from sklearn.feature_selection import RFECV
+from sklearn.svm import SVC
 import matplotlib.pyplot as plt
 
 
@@ -230,36 +236,50 @@ def selectCustApp3rd(df_cust_app_3rd):
 def selectTelDetailInfo(df_tel_detail_info):
     #print df_tel_detail_info.describe()
 
-    # 筛选高度共线性变量
+    # 筛选高度共线性变量, 并打印到屏幕
     df_corr = df_tel_detail_info.corr()
     df_corr_t1 = df_corr[df_corr>=0.8].replace(1.0, np.nan)
     df_corr_t1.dropna(axis=0, how='all', inplace=True)
     df_corr_t1.dropna(axis=1, how='all', inplace=True)
-    print df_corr_t1
+    # 如果有相似度大于80%的变量, 打印到屏幕
+    # 同时将变量名加入拟去除列表
+    if len(df_corr_t1)>0:
+	print df_corr_t1
+
+    datasets = df_tel_detail_info.values
+    data = datasets[:, 0]
+    data = np.array(data).reshape(len(data), 1)
+    scaler = Normalizer().fit_transform(data)
+    print scaler
 
 """
-    y = df_tel_detail_info['ovd_daynum'].values
-    y = y.reshape(len(y),1)
-    del df_tel_detail_info['ovd_daynum']
-    X = df_tel_detail_info.values
+    labels_list = df_tel_detail_info.columns.tolist()
+#    scaler = MaxAbsScaler().fit_transform(datasets)
+    #print datasets.shape, '\n', datasets, '\n'
+    #print scaler.shape, '\n', scaler, '\n'
+    y = scaler[:, 0]
+    X = scaler[:, 1:]
     #print X.shape, '\n', X, '\n'
     #print y.shape, '\n', y, '\n'
 
-    # 删除达不到最低方差标准的特征(方差会受异常值的较大影响)
-    #X_new = VarianceThreshold(threshold=10**5).fit_transform(X) 
-    #print X_new.shape, '\n', X_new, '\n'
+    #rlasso = RandomizedLasso()
+    #rlasso.fit(X, y)
+    #print rlasso.scores_
+    #print sorted(zip(map(lambda x: round(x, 4), rlasso.scores_),
+#	    labels_list[1:]), reverse=True)
 
-    # 无量纲化
-    #scaled_x = MinMaxScaler().fit_transform(X)
-    #scaled_y = MinMaxScaler().fit_transform(y)
-    scaled_x = Normalizer().fit_transform(X)
-    scaled_y = Normalizer().fit_transform(y)
-    #print scaled_x.shape, '\n', scaled_x, '\n'
-    #print scaled_y.shape, '\n', scaled_y, '\n'
-    #print pd.DataFrame(scaled_x).describe()
-    #print pd.DataFrame(scaled_y).describe()
-    
+    #rf = RandomForestRegressor()
+    #rf.fit(X, y)
+    #print sorted(zip(map(lambda x: round(x, 4), rf.feature_importances_),
+#	    labels_list[1:]), reverse=True)
+
     clf = ExtraTreesClassifier()
+    clf.fit(X, y)
+    print sorted(zip(map(lambda x: round(x, 4), clf.feature_importances_),
+	    labels_list[1:]), reverse=True)
+"""
+
+"""
     # 重复多次得到特征的频数靠前的
     # 作为从121个特征中筛选得到的
     list_index = []
