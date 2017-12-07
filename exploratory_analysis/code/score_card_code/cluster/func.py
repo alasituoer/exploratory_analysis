@@ -13,296 +13,135 @@ from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import RandomizedLasso
 
-
 from sklearn.cluster import KMeans
 from sklearn.manifold import TSNE
 from sklearn.model_selection import StratifiedKFold
 from sklearn.feature_selection import RFECV
 from sklearn.svm import SVC
-import matplotlib.pyplot as plt
 
 
 def clusterSelectedIndex(df_selected_index):
-    df_selected_index = df_selected_index.drop(
-	    ['service_fee', 'address_count', 'face_compare', 
-	    'last_usetime_cha', 'trade_register_count',
-	    'I1_4', 'I1_5',], axis=1)
+    #print df_selected_index.describe()
 
-    
-#    print df_selected_index.describe()
-    X = df_selected_index[:5000].values
-    #scaled_x = Normalizer().fit_transform(X)
-    scaled_x = StandardScaler().fit_transform(X)
+    # 因后面的递归特征消除法筛选的代删除特征
+#    df_selected_index = df_selected_index.drop([], axis=1)
 
-    k = 3
+    # 对各部分合并的总指标检查共线性
+    df_corr = df_selected_index.corr()
+    df_corr_t1 = df_corr[df_corr>=0.8].replace(1.0, np.nan)
+    df_corr_t1.dropna(axis=0, how='all', inplace=True)
+    df_corr_t1.dropna(axis=1, how='all', inplace=True)
+    if len(df_corr_t1)>0:
+	print df_corr_t1, '\n'
+
+    datasets = df_selected_index.values
+    labels_list = df_selected_index.columns.tolist()
+    maxabs_scaled = MaxAbsScaler().fit_transform(datasets)
+    #print datasets.shape, '\n', datasets, '\n'
+    #print maxabs_scaled.shape, '\n', maxabs_scaled, '\n'
+
+    maxabs_scaled = maxabs_scaled[:2000, :]
+    k = 5
     iteration = 500
     model = KMeans(n_clusters=k, n_jobs=4, max_iter=iteration)
-    y_pred = model.fit_predict(scaled_x)
+    y_pred = model.fit_predict(maxabs_scaled)
     print pd.Series(model.labels_).value_counts()
-    print pd.DataFrame(model.cluster_centers_)
+    df_cluster_centers = pd.DataFrame(model.cluster_centers_, columns=labels_list)
+    df_cluster_centers.to_csv('cluster_' + str(k) + '_centers_.csv')
+    print df_cluster_centers
     #print y_pred
 
-    # 循环特征消除法 选择特征变量
+    # 递归特征消除法 选择特征变量
     svc = SVC(kernel="linear")
     rfecv = RFECV(estimator=svc, step=1,\
 		cv=StratifiedKFold(2), scoring="accuracy")
-    rfecv.fit(scaled_x, y_pred)
+    rfecv.fit(maxabs_scaled, y_pred)
     print rfecv.n_features_
     print rfecv.support_
     print sorted(zip(rfecv.ranking_, df_selected_index.columns))
 
-    X_tsne = TSNE(learning_rate=100).fit_transform(scaled_x)
+    X_tsne = TSNE(learning_rate=100).fit_transform(maxabs_scaled)
     plt.figure(figsize=(10, 5))
     plt.scatter(X_tsne[:,0], X_tsne[:, 1], c=y_pred)
     plt.show()
 
 
-def rfeSelectedIndex(df_selected_index):
+#feature seleceting 电话详单, 客户信息+p2p+第三方, 订单信息
+def featureSelecting(df_index_tobe_selected, *path_to_write):
+    #print df_index_tobe_selected.describe()
 
-    # 按照逾期天数分类: 0, 1-3, 4-7, 8-14, 15-30, 31+
-    print df_selected_index.loc[df_selected_index['ovd_daynum'] in range(1, 4)].head()
-
-"""
-    #print df_selected_index.head()
-    arr_selected_index = df_selected_index.values
-    scaled_selected_index = Normalizer().fit_transform(arr_selected_index)
-    X = scaled_selected_index[:1000, 1:]
-    y = scaled_selected_index[:1000, 0]
-    y = y.reshape(len(y), 1)
-    #print scaled_selected_index[:5,:]
-    #print X[:5, :], y[:5, :]
-
-    svc = SVC(kernel="linear")
-    rfecv = RFECV(estimator=svc, step=1,\
-		cv=StratifiedKFold(2), scoring="accuracy")
-    rfecv.fit(X, y)
-    print rfecv.n_features_
-    print rfecv.support_
-    print rfecv.ranking_
-
-"""
-
-
-
-
-def ivSelectedIndex(path_file, filename1, filename2):
-    import woe.config as config
-    import woe.feature_process as fp
-    import woe.eval as eval
-
-    data_path = path_file + filename1
-    config_path = path_file + filename2
-    cfg = config.config()
-    cfg.load_file(config_path, data_path)
-    
-    # target ? 求IV值要先定义好坏样本, 由好坏比例求WOE
-    #print type(cfg.dataset_train)
-    print cfg.dataset_train.head()
-    #print type(cfg.bin_var_list)
-    
     """
-    for var in cfg.bin_var_list:
-        # fill null
-        cfg.dataset_train.loc[cfg.dataset_train[var].isnull(), (var)] = 0
-    
-    # change feature dtypes
-    fp.change_feature_dtype(cfg.dataset_train, cfg.variable_type)
-    
-    #print cfg.variable_type
-    #print cfg.dataset_train.head()
-    
-    rst = []
-    
-    # process woe transformation of continuous variables
-    for var in cfg.bin_var_list[:3]:
-        rst.append(fp.proc_woe_continuous(cfg.dataset_train,var,cfg.global_bt,cfg.global_gt,cfg.min_sample,alpha=0.05))
-    
-    # process woe transformation of discrete variables
-    for var in cfg.discrete_var_list:
-        # fill null
-        cfg.dataset_train.loc[cfg.dataset_train[var].isnull(), (var)] = 'missing'
-        rst.append(fp.proc_woe_discrete(cfg.dataset_train,var,cfg.global_bt,cfg.global_gt,cfg.min_sample,alpha=0.05))
-    
-    feature_detail = eval.eval_feature_detail(rst,'output_feature_detail.csv')
-    """
+    datasets = df_index_tobe_selected.values
+    labels_list = df_index_tobe_selected.columns.tolist()
 
+    #1 Normalizer()
+    #normal_scaler = Normalizer().fit_transform(datasets)
+    #print normal_scaler[:, 0]
 
-
-# 订单信息
-def selectOrderInfo(df_order_info):
-    #print df_order_info.describe()
-
-    #df_corr = df_order_info.corr()
-    #df_corr_t1 = df_corr[df_corr>=0.8].replace(1.0, np.nan)
-    #df_corr_t1.dropna(axis=0, how='all', inplace=True)
-    #df_corr_t1.dropna(axis=1, how='all', inplace=True)
-    #print df_corr_t1
-    
-    y = df_order_info['ovd_daynum'].values
-    y = y.reshape(len(y),1)
-    del df_order_info['ovd_daynum']
-    X = df_order_info.values
-    scaled_x = Normalizer().fit_transform(X)
-    scaled_y = Normalizer().fit_transform(y)
-    
-    iter_num = 20
-    top_num = 20
-    clf = ExtraTreesClassifier()
-    list_index = []
-    for i in range(iter_num):
-	clf.fit(scaled_x, scaled_y.ravel())
-	#print clf.feature_importances_
-	data = zip(df_order_info.columns, clf.feature_importances_)
-	#print data
-	top_index = sorted(data, key=lambda t: (-t[1]))[:top_num]
-	#print top_index, '\n'
-	list_index.append(top_index)
-    #print list_index
-
-    dict_index = {}
-    list_name = list({x[0] for l in list_index for x in l})
-    for n in list_name:
-	s = 0.0
-	it = 0
-	for l in list_index:
-	    #print n, dict(l)[n]
-	    s += dict(l)[n]
-	    it += 1
-	#print n, s, s*1.0/it
-	dict_index[n] = s*1.0/it
-
-    list_selected_index = [x for x in dict_index.iteritems()\
-	    if x[1] > max(dict_index.values())/2]
-    list_selected_index = sorted(list_selected_index,\
-	    key=lambda x: x[1], reverse=True) 
-    #print list_selected_index
-    print [x[0] for x in list_selected_index]
-
-
-# 客户基本信息 APP信息 第三方信息
-def selectCustApp3rd(df_cust_app_3rd):
-    #print df_cust_app_3rd.describe()
-
-    #df_corr = df_cust_app_3rd.corr()
-    #df_corr_t1 = df_corr[df_corr>0.8].replace(1.0, np.nan)
-    #df_corr_t1.dropna(axis=0, how='all', inplace=True)
-    #df_corr_t1.dropna(axis=1, how='all', inplace=True)
-    #print df_corr_t1
-
-    y = df_cust_app_3rd['ovd_daynum'].values
-    y = y.reshape(len(y),1)
-    del df_cust_app_3rd['ovd_daynum']
-    X = df_cust_app_3rd.values
-
-    scaled_x = Normalizer().fit_transform(X)
-    scaled_y = Normalizer().fit_transform(y)
-    
-    iter_num = 20
-    top_num = 20
-    clf = ExtraTreesClassifier()
-    list_index = []
-    for i in range(iter_num):
-	clf.fit(scaled_x, scaled_y.ravel())
-	#print clf.feature_importances_
-	data = zip(df_cust_app_3rd.columns, clf.feature_importances_)
-	#print data
-	top_index = sorted(data, key=lambda t: (-t[1]))[:top_num]
-	#print top_index, '\n'
-	list_index.append(top_index)
-    #print list_index
-    # 获取iter_num组特征名的并集
-    dict_index = {}
-    list_name = list({x[0] for l in list_index for x in l})
-    for n in list_name:
-	s = 0.0
-	it = 0
-	for l in list_index:
-	    #print n, dict(l)[n]
-	    s += dict(l)[n]
-	    it += 1
-	#print n, s, s*1.0/it
-	dict_index[n] = s*1.0/it
-
-    list_selected_index = [x for x in dict_index.iteritems()\
-	    if x[1] > max(dict_index.values())/2]
-    list_selected_index = sorted(list_selected_index,\
-	    key=lambda x: x[1], reverse=True) 
-    print list_selected_index
-    print [x[0] for x in list_selected_index]
-
-
-
-# 电话详单
-def selectTelDetailInfo(df_tel_detail_info):
-    #print df_tel_detail_info.describe()
-
-    # 筛选高度共线性变量, 并打印到屏幕
-    df_corr = df_tel_detail_info.corr()
-    df_corr_t1 = df_corr[df_corr>=0.8].replace(1.0, np.nan)
-    df_corr_t1.dropna(axis=0, how='all', inplace=True)
-    df_corr_t1.dropna(axis=1, how='all', inplace=True)
-    # 如果有相似度大于80%的变量, 打印到屏幕
-    # 同时将变量名加入拟去除列表
-    if len(df_corr_t1)>0:
-	print df_corr_t1
-
-    datasets = df_tel_detail_info.values
-    data = datasets[:, 0]
-    data = np.array(data).reshape(len(data), 1)
-    scaler = Normalizer().fit_transform(data)
-    print scaler
-
-"""
-    labels_list = df_tel_detail_info.columns.tolist()
-#    scaler = MaxAbsScaler().fit_transform(datasets)
+    #2 MaxAbsScaler [采用]
+    maxabs_scaler = MaxAbsScaler().fit_transform(datasets)
     #print datasets.shape, '\n', datasets, '\n'
-    #print scaler.shape, '\n', scaler, '\n'
-    y = scaler[:, 0]
-    X = scaler[:, 1:]
+    #print maxabs_scaler.shape, '\n', maxabs_scaler, '\n'
+    y = maxabs_scaler[:, 0]
+    X = maxabs_scaler[:, 1:]
     #print X.shape, '\n', X, '\n'
     #print y.shape, '\n', y, '\n'
 
-    #rlasso = RandomizedLasso()
-    #rlasso.fit(X, y)
-    #print rlasso.scores_
-    #print sorted(zip(map(lambda x: round(x, 4), rlasso.scores_),
-#	    labels_list[1:]), reverse=True)
+    # RandomizedLasso [采用]
+    rlasso = RandomizedLasso()
+    rlasso.fit(X, y)
+    rank_list = sorted(zip(labels_list[1:], 
+	    map(lambda x: round(x, 4), rlasso.scores_)),
+	    key=lambda x: x[1], reverse=True)
 
+    #1 RandomFroestRegressor
     #rf = RandomForestRegressor()
     #rf.fit(X, y)
     #print sorted(zip(map(lambda x: round(x, 4), rf.feature_importances_),
-#	    labels_list[1:]), reverse=True)
+	#    labels_list[1:]), reverse=True)
 
-    clf = ExtraTreesClassifier()
-    clf.fit(X, y)
-    print sorted(zip(map(lambda x: round(x, 4), clf.feature_importances_),
-	    labels_list[1:]), reverse=True)
-"""
+    #2 target should be types or muticlasses [removed]
+    #clf = ExtraTreesClassifier()
+    #clf.fit(X, y)
+    #print sorted(zip(map(lambda x: round(x, 4), clf.feature_importances_),
+	#    labels_list[1:]), reverse=True)
 
-"""
-    # 重复多次得到特征的频数靠前的
-    # 作为从121个特征中筛选得到的
-    list_index = []
-    iter_num = 20
-    top_num = 20
-    for i in range(iter_num):
-	# 特征选择(树算法计算特征信息量)
-	clf.fit(scaled_x, scaled_y.ravel())
-	#print len(df_tel_detail_info.columns)
-	#print clf.feature_importances_.shape
-	# 返回排名靠前的特征(序号及特征名)
-	data = zip(clf.feature_importances_, df_tel_detail_info.columns)
-	top_index = sorted(data, key=lambda t: (-t[0]))[:top_num]
-	list_index.extend([x[1] for x in top_index])
-    dict_index_appear = dict((a, list_index.count(a)) for a in list_index)
-    dict_index_appear = sorted(dict_index_appear.iteritems(),\
-	    key=lambda t:t[1], reverse=True)
-    print [x for x in dict_index_appear if x[1] > iter_num/2]
-"""
+    #print rank_list
+    df_score_rank = pd.DataFrame(rank_list, columns=['label', 'score_rank',])
+    # save the result
+    print df_score_rank[df_score_rank['score_rank']>=0.8]['label'].values.tolist()
+    print '\n\n'
+    #df_score_rank.to_csv(filename + '.csv', index=False)
+    """
+
+def sepCorrFeatureList(df_index_tobe_selected):
+    """输入一个DataFrame或ndarray, 筛选高度共线性变量,
+	返回拟删除的特征列表和拟保留的特征列表"""
+    #DataFrame.corr(method='pearson', min_periods=1)
+    #method: ['pearson', 'kendall', 'spearman',]
+
+    all_features_list = df_index_tobe_selected.columns.tolist()
+    # 截取correlation coefficient > corr_coef_ 部分, 返回截取后的DataFrame
+    corr_coef_ = 0.8
+    df_corr = df_index_tobe_selected.corr()
+    df_corr_t1 = df_corr[df_corr >= corr_coef_].replace(1.0, np.nan)
+    df_corr_t1.dropna(axis=0, how='all', inplace=True)
+    df_corr_t1.dropna(axis=1, how='all', inplace=True)
+
+    print "去除共线性前的特征数: ", len(all_features_list)
+    max_series = df_corr_t1.max()
+    #print max_series
+    corr_feature = max_series[max_series==max_series.max()].index
+    corr1_rest_feature_list =\
+	df_corr_t1.ix[corr_feature[0]].drop(corr_feature[1]).dropna().values.tolist()
+    corr2_rest_feature_list =\
+	df_corr_t1.ix[corr_feature[1]].drop(corr_feature[0]).dropna().values.tolist()
+    if max(corr1_rest_feature_list) > max(corr2_rest_feature_list):
+	#删除corr2特征
 
 
 
-
+# PCA 降维
 def pcaTelDetailInfo(df_tel_detail_info):
     # 特征选择完成后进行降维处理
     df_tel_detail_info.fillna(df_tel_detail_info.mean(), inplace=True)
@@ -321,34 +160,4 @@ def pcaTelDetailInfo(df_tel_detail_info):
     #print 'explained_variance_', pca.explained_variance_
     print 'n_components', pca.n_components_
 
-
-def tryScalerData(filename):
-
-#    print df.head()
-#    print df.describe()
-
-    df_test = df#[qualitative_variables_list]
-    # 处理定性特征缺失值为'NA', 单独为一类
-    # 对定性特征标准化
-    for i in qualitative_variables_list:
-	integer_encoded = LabelEncoder().fit_transform(df_test[i])
-	integer_encoded = integer_encoded.reshape(len(integer_encoded), 1)
-	#print integer_encoded
-	# 需不需要对定性变量哑编码(减少信息损失)
-	#onehot_encoder = OneHotEncoder(sparse=False)
-	#onehot_encoded = onehot_encoder.fit_transform(integer_encoded)
-	#print onehot_encoded
-	df_test[i] = integer_encoded
-    #print df_test
-    
-    df_test.dropna(axis=0, how='any', inplace=True)
-    #print df_test
-
-    #print df_test.as_matrix()
-    print df_test.values
-    #mat_test = StandardScaler().fit_transform(df_test.values)
-    mat_test = Normalizer().fit_transform(df_test.values)
-    print mat_test.shape
-    print sum(mat_test.T)
-    
 

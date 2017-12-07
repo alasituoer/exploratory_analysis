@@ -16,6 +16,16 @@ qualitative_variables_list =\
 encoded_qual_var_list =\
 	['status', 'id_type', 'reason_code', 'realname',\
 	'address_contact', 'coll_result',]
+
+
+
+
+
+# 合并各部分指标后再次检查共线性
+corr_all_index_list = ['dialing_count', #I4
+	'black_circle_count',] #F5
+
+
 # 客户地址信息
 cust_address_list =\
         ['live_city.now_city', 'live_city.work_city', 'live_city.id_city',
@@ -59,7 +69,7 @@ selected_order_info_index_list = ['payment_amount', 'term', 'service_fee',]
 
 # 客户基本信息+app+第三方有效指标
 cust_app_3rd_index_list =\
-	['face_compare', 'zhima_score', 'age', 'institu_amt', 'bnk_amt', 
+	['face_compare', 'zhima_score', 'age', #'institu_amt', 'bnk_amt', 
 	'cnss_amt', 'p2p_amt', 'query_amt', 'query_amt_m3', 'query_amt_m6', 
 	'dialing_count', 'called_count', 'contact_count', 'black_circle_count', 
 	'e5_value_count', 'calllog_trad_count', 'collection_count', 
@@ -71,10 +81,12 @@ corr_cust_app_3rd_index_list =\
 	['cnss_amt', 'p2p_amt', 'query_amt', 'query_amt_m3', 'query_amt_m6',]#institu_amt
 #拟选择特征(客户基本信息+app+第三方信息)
 selected_cust_app_3rd_index_list =\
-	['face_compare', 'age', 'address_count', 'last_usetime_cha', 
-	'trade_register_count', 'zhima_score', 'called_count',
-	'dialing_count', 'contact_count', 'calllog_trad_count',
-	'address_black_count']
+	['face_compare', 'zhima_score', 'age', 'dialing_count', 
+	'contact_count', 'black_circle_count', 'calllog_trad_count', 
+	'collection_count', 'dialing_one', 'address_black_count', 
+	'sms_fail_count', 'phoneToptenCount', 'address_count', 
+	'apply_fail_count2', 'trade_register_count', 'last_usetime_cha', 
+	'address_collection_count', 'called_count', 'e5_value_count']
 
 
 # 电话详单有效指标
@@ -130,26 +142,6 @@ selected_tel_detail_info_index_list =\
 	'D9_2', 'I1_2', 'I1_4', 'F6_3', 'E5_3', 'I11_1', 'D1_1', 
 	'C6_1', 'E3_2', 'D1_2', 'C8_2', 'I2_1', 'C1', 'D11_2', 
 	'D2_5', 'E5_2', 'C4', 'D2_1']
-
-"""
-# Tree
-selected_tel_detail_info_index_list =\
-	['D7', 'I4', 'F8_1', 'F9_1',
-	'D1_1', 'D1_2', 'D1_3', 'D1_4', 'D1_5',
-	'I1_1', 'I1_2', 'I1_3', 'I1_4', 'I1_5',
-	'E3_1', 'E3_2', 'E3_3',]
-"""
-
-"""
-	['D1_1', 'D1_2', 'D1_3', 'D1_4', 'D1_5',
-	'D7', 'D14',
-	'F8_1', 'F8_2', 'F8_3', 'F8_4',
-	'F9_1', 'F9_2', 'F9_3', 'F9_4', 'F9_5',
-	'I1_1', 'I1_2', 'I1_3',
-	'I4', 'I5',]
-"""
-
-
 
 
 
