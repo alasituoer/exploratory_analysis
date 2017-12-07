@@ -132,11 +132,11 @@ def sepCorrFeatureList(df_index_tobe_selected):
     max_series = df_corr_t1.max()
     #print max_series
     corr_feature = max_series[max_series==max_series.max()].index
-    corr1_rest_feature_list =\
+    corr1_left_feature_list =\
 	df_corr_t1.ix[corr_feature[0]].drop(corr_feature[1]).dropna().values.tolist()
-    corr2_rest_feature_list =\
+    corr2_left_feature_list =\
 	df_corr_t1.ix[corr_feature[1]].drop(corr_feature[0]).dropna().values.tolist()
-    if max(corr1_rest_feature_list) > max(corr2_rest_feature_list):
+    if max(corr1_left_feature_list) > max(corr2_left_feature_list):
 	#删除corr2特征
 
 
