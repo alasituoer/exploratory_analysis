@@ -3,20 +3,16 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from data import removed_list
+from data import removed_features
 from data import tel_detail_info_index_list
-from data import corr_tel_detail_info_index_list
 from data import cust_app_3rd_index_list
-from data import corr_cust_app_3rd_index_list
 from data import order_info_index_list
-from data import corr_order_info_index_list
-from data import corr_all_index_list
 
 from data import selected_tel_detail_info_index_list
 from data import selected_cust_app_3rd_index_list
 from data import selected_order_info_index_list
 
-from func import sepCorrFeatureList
+from func import sepCorrFeatures
 from func import featureSelecting
 from func import clusterSelectedIndex
 #from func import rfeSelectedIndex
@@ -30,12 +26,10 @@ if __name__ == "__main__":
     filename = "coll_dataset2.txt"
 
     df = pd.read_csv(working_space + filename, index_col=0)
-    list_df_columns = list(df.columns)
-    # 去除认定不需要的变量
-    for i in removed_list:
-	list_df_columns.remove(i)
-    df = df[list_df_columns]
-    #print df.head()
+    selected_features = [f for f in df.columns if f not in removed_features]
+    df = df[selected_features]
+    print df.describe().ix['count']
+
 
     # 对样本聚类分析
     """
@@ -64,15 +58,16 @@ if __name__ == "__main__":
     featureSelecting(df_cust_app_3rd, 'cust_app_3rd')
     """
 
-    #1 对电话详单部分筛选变量
+    """
+    #1 去除高度共线性的特征
     #print len(tel_detail_info_index_list)
-    #print corr_tel_detail_info_index_list
-#    tel_detail_info_index_list = [x for x in tel_detail_info_index_list\
-#	    if x not in corr_tel_detail_info_index_list]
     df_tel_detail_info = df[['ovd_daynum'] + tel_detail_info_index_list]
     df_tel_detail_info = df_tel_detail_info.dropna(axis=0, how='any')
     df_tel_detail_info.applymap(lambda x: float(x))
-    sepCorrFeatureList(df_tel_detail_info)
+    df_removed_corr = sepCorrFeatures(df_tel_detail_info)
+    print df_removed_corr
+    """
+
 #    featureSelecting(df_tel_detail_info, 'tel_detail_info')
 
 

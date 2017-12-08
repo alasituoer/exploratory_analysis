@@ -1,12 +1,21 @@
 #coding:utf-8
 # 不需要的指标
-removed_list = ['cust_id', 'phone_no', 'id_no', 'name',
-	     'payment_date', 'apply_time', 'audit_time', 'payment_time',
-	     'repayment_time', 'reject_reason', 'not_get_fetch_detail',
-	     'repayment_type', 'pay_channel', 'created_by', 'created_time',
-	     'last_modified_by', 'last_modified_time', 'upd_dt', 'order_source',
-	     'st_date', 'min_date', 'now_city_code', 'work_area',
-	     'is_sms', 'is_contacts', 'refuseMessage',]
+removed_features =\
+	['cust_id', 'phone_no', 'id_no', 'name',
+	'payment_date', 'apply_time', 'audit_time', 'payment_time',
+	'repayment_time', 'reject_reason', 'not_get_fetch_detail',
+	'repayment_type', 'pay_channel', 'created_by', 'created_time',
+	'last_modified_by', 'last_modified_time', 'upd_dt', 'order_source',
+	'st_date', 'min_date', 'now_city_code', 'work_area',
+	'is_sms', 'is_contacts', 'refuseMessage', 'max_ovd',]
+
+# 离散型特征
+discrete_features =\
+	['amount', 'term', 'rate', 'service_fee', 'payment_amount',
+	'status', 'reloan', 'H1', 'source', 'channel', 'id_province',
+	'now_province', 'work_province', 'gender', 'id_type', 
+	'reason_code', 'industry', 'realname', 'address_contact',
+	'coll_result',]
 
 # 需编码的定性指标(橙色)
 qualitative_variables_list =\
@@ -14,16 +23,8 @@ qualitative_variables_list =\
 	'now_province', 'work_province', 'gender', 'industry',]
 # 已编码的定性指标（黄色）
 encoded_qual_var_list =\
-	['status', 'id_type', 'reason_code', 'realname',\
+	['status', 'reloan', 'id_type', 'reason_code', 'realname',\
 	'address_contact', 'coll_result',]
-
-
-
-
-
-# 合并各部分指标后再次检查共线性
-corr_all_index_list = ['dialing_count', #I4
-	'black_circle_count',] #F5
 
 
 # 客户地址信息
@@ -60,9 +61,6 @@ cust_address_list =\
 # 订单有效指标
 order_info_index_list =\
 	['amount', 'term', 'rate', 'service_fee', 'payment_amount',]
-corr_order_info_index_list =\
-	['amount' , #payment_amount
-	'rate', ] #term
 selected_order_info_index_list = ['payment_amount', 'term', 'service_fee',]
 
 
@@ -77,8 +75,6 @@ cust_app_3rd_index_list =\
 	'address_collection_count', 'sms_fail_count', 'phoneToptenCount', 
 	'address_count', 'apply_fail_count2', 'trade_register_count', 
 	'last_usetime_cha',]
-corr_cust_app_3rd_index_list =\
-	['cnss_amt', 'p2p_amt', 'query_amt', 'query_amt_m3', 'query_amt_m6',]#institu_amt
 #拟选择特征(客户基本信息+app+第三方信息)
 selected_cust_app_3rd_index_list =\
 	['face_compare', 'zhima_score', 'age', 'dialing_count', 
@@ -118,18 +114,6 @@ tel_detail_info_index_list = \
 	'I1_1', 'I1_2', 'I1_3', 'I1_4', 'I1_5',
 	'I2_1', 'I2_2', 'I2_3', 'I2_4', 'I2_5',
 	'I3', 'I4', 'I5',]
-corr_tel_detail_info_index_list =\
-    ['I11_2', 'I11_3', 'I11_4', 'I11_5', 'C2',#C3
-    'C7_1', 'C7_2', 'C7_3', 'C7_4', 'C9', 'C10',
-
-    'U1', 'U2', 'U3', 'U4', 'U5', 'D5', 'D6', 'D10_1',#F2
-    'D10_2', 'D10_3', 'D10_4', 'D12', 'D13', 'E1_1',
-    'E1_2', 'E1_3', 'E1_4', 'E1_5', 'F1',
-    
-    'C11', #C4
-    'D14', #D7
-    'I5',] #I4
-
 
 # 拟选择的特征
 # random lasso

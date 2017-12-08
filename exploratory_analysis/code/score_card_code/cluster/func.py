@@ -114,30 +114,70 @@ def featureSelecting(df_index_tobe_selected, *path_to_write):
     #df_score_rank.to_csv(filename + '.csv', index=False)
     """
 
-def sepCorrFeatureList(df_index_tobe_selected):
+def sepCorrFeatures(df_index_tobe_selected):
     """输入一个DataFrame或ndarray, 筛选高度共线性变量,
-	返回拟删除的特征列表和拟保留的特征列表"""
+	返回删除共线性特征后的DataFrame"""
     #DataFrame.corr(method='pearson', min_periods=1)
     #method: ['pearson', 'kendall', 'spearman',]
 
     all_features_list = df_index_tobe_selected.columns.tolist()
+#    print "去除共线性前的特征数: ", len(all_features_list)
     # 截取correlation coefficient > corr_coef_ 部分, 返回截取后的DataFrame
     corr_coef_ = 0.8
+
+    # 计算特征间相关系数矩阵, 作为循环判断的起始条件
     df_corr = df_index_tobe_selected.corr()
     df_corr_t1 = df_corr[df_corr >= corr_coef_].replace(1.0, np.nan)
     df_corr_t1.dropna(axis=0, how='all', inplace=True)
     df_corr_t1.dropna(axis=1, how='all', inplace=True)
+    feature_tobe_removed_list = []
+    while len(df_corr_t1)>0:
+        max_series = df_corr_t1.max()
+        corr_feature = max_series[max_series==max_series.max()].index
+#        print '相关系数矩阵中最大值及对应特征: ', corr_feature, max_series.max()
+        corr1_left_feature_list =\
+	    df_corr_t1.ix[corr_feature[0]].drop(corr_feature[1]).dropna().values.tolist()
+        corr2_left_feature_list =\
+	    df_corr_t1.ix[corr_feature[1]].drop(corr_feature[0]).dropna().values.tolist()
+#        print corr1_left_feature_list
+#        print corr2_left_feature_list
 
-    print "去除共线性前的特征数: ", len(all_features_list)
-    max_series = df_corr_t1.max()
-    #print max_series
-    corr_feature = max_series[max_series==max_series.max()].index
-    corr1_left_feature_list =\
-	df_corr_t1.ix[corr_feature[0]].drop(corr_feature[1]).dropna().values.tolist()
-    corr2_left_feature_list =\
-	df_corr_t1.ix[corr_feature[1]].drop(corr_feature[0]).dropna().values.tolist()
-    if max(corr1_left_feature_list) > max(corr2_left_feature_list):
-	#删除corr2特征
+	try:
+	    max_corr1_left_feature = max(corr1_left_feature_list)
+	except:
+	    max_corr1_left_feature = 0
+	try:
+	    max_corr2_left_feature = max(corr2_left_feature_list)
+	except:
+	    max_corr2_left_feature = 0
+#        print corr_feature[0], '的剩余交叉特征最大相关系数: ', max_corr1_left_feature
+#        print corr_feature[1], '的剩余交叉特征最大相关系数: ', max_corr2_left_feature
+
+        #删除与其他特征最大相关系数较小的特征
+        if max_corr1_left_feature >= max_corr2_left_feature:
+#	    print '拟删除特征: ', corr_feature[1]
+	    # 从大于指定阈值的待删减系数矩阵去除已确定的删减特征
+	    df_corr_t1.drop(corr_feature[1], axis=0, inplace=True)
+	    df_corr_t1.drop(corr_feature[1], axis=1, inplace=True)
+	    df_corr_t1.dropna(axis=0, how='all', inplace=True)
+	    df_corr_t1.dropna(axis=1, how='all', inplace=True)
+	    feature_tobe_removed_list.append(corr_feature[1])
+        else:
+#	    print '拟删除特征: ', corr_feature[0]
+	    #df_index_tobe_selected.drop(corr_feature[0], axis=1, inplace=True)
+	    df_corr_t1.drop(corr_feature[0], axis=0, inplace=True)
+	    df_corr_t1.drop(corr_feature[0], axis=1, inplace=True)
+	    df_corr_t1.dropna(axis=0, how='all', inplace=True)
+	    df_corr_t1.dropna(axis=1, how='all', inplace=True)
+	    feature_tobe_removed_list.append(corr_feature[0])
+
+#	print '新特征间相关系数矩阵特征数: ', len(df_corr_t1), '\n'
+#	print df_corr_t1
+
+#    print feature_tobe_removed_list
+    return df_index_tobe_selected[[f for f in all_features_list\
+	    if f not in feature_tobe_removed_list]]
+
 
 
 
