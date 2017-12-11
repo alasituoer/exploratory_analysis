@@ -8,6 +8,8 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import MaxAbsScaler
 from sklearn.preprocessing import Normalizer
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder
 
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.ensemble import RandomForestRegressor
@@ -177,6 +179,49 @@ def sepCorrFeatures(df_index_tobe_selected):
 #    print feature_tobe_removed_list
     return df_index_tobe_selected[[f for f in all_features_list\
 	    if f not in feature_tobe_removed_list]]
+
+
+def onehotDiscreteFeatures(df):
+    """将定性变量重编码为哑变量, 返回转换后的新DataFrame, 同时返回各变量的重编码规则
+	以列表的形式返回 [dict_all_cates_label_encoder, df_onehot_encoded]"""
+    #print df.describe().ix['count']
+    #count_ss = df.describe().ix['count']
+    #print count_ss
+    #print count_ss.describe()
+
+    df_init = pd.DataFrame(np.zeros(len(df)), columns=['init'])
+    # 以字典的格式存放所有列的重编码规则
+    dict_all_cates_label_encoder = {}
+    for c in df.columns:
+	tobe_encoded = df[c].values
+#	print tobe_encoded, '\n'
+	label_encoder = LabelEncoder()
+	label_encoder.fit(tobe_encoded)
+	#print 'label, tobe_encoded'
+
+	# 临时存放某一列的重编码规则
+	dict_one_cate_label_encoder = {}
+	for ix, it in enumerate(label_encoder.classes_):
+	    dict_one_cate_label_encoder[ix] = it
+	#print dict_one_cate_label_encoder
+	dict_all_cates_label_encoder[c] = dict_one_cate_label_encoder
+
+	label_encoded = label_encoder.transform(tobe_encoded)
+	label_encoded = np.array(label_encoded).reshape(len(label_encoded), 1)
+	#print label_encoded
+	onehot_encoded = OneHotEncoder().fit_transform(label_encoded).toarray()
+	columns = [c + '_mat_' + str(i) for i in range(len(label_encoder.classes_))]
+#	print len(onehot_encoded), '\n', onehot_encoded, '\n'
+	df_init = pd.concat([df_init,
+		pd.DataFrame(onehot_encoded, columns=columns)], axis=1)
+    df_onehot_encoded = df_init.drop(columns=['init'], axis=1)
+#    print dict_all_cates_label_encoder['industry'][0]
+#    print dict_all_cates_label_encoder
+#    print df_onehot_encoded.head()
+
+    return [dict_all_cates_label_encoder, df_onehot_encoded]
+
+
 
 
 

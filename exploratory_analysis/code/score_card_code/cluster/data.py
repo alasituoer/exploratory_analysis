@@ -1,21 +1,57 @@
 #coding:utf-8
 # 不需要的指标
 removed_features =\
-	['cust_id', 'phone_no', 'id_no', 'name',
+	[#时间点类型数据以及明显不用加入的指标
+	'cust_id', 'phone_no', 'id_no', 'name',
 	'payment_date', 'apply_time', 'audit_time', 'payment_time',
 	'repayment_time', 'reject_reason', 'not_get_fetch_detail',
 	'repayment_type', 'pay_channel', 'created_by', 'created_time',
 	'last_modified_by', 'last_modified_time', 'upd_dt', 'order_source',
 	'st_date', 'min_date', 'now_city_code', 'work_area',
-	'is_sms', 'is_contacts', 'refuseMessage', 'max_ovd',]
+	'is_sms', 'is_contacts', 'refuseMessage', 'max_ovd',
+	# 因缺失数量太多(且填充其他数值具有误导性)而去掉的指标
+	'id_type', 'reason_code', 'institu_amt', 'bnk_amt', 'cnss_amt', 
+	'p2p_amt', 'query_amt', 'query_amt_m3', 'query_amt_m6',
+	# 离散型变量分类不准确导致过多
+	'H1',
+	# 完全重复特征, 名称不同
+	'live_city.work_city', 'live_city.mobile_city', 'live_city.ec2_city', 
+	'now_city.live_city', 'now_city.id_city', 'now_city.ec1_city', 
+	'now_city.bk_mob_city', 'work_city.now_city', 'work_city.mobile_city', 
+	'work_city.ec2_city', 'id_city.live_city', 'id_city.work_city', 
+	'id_city.ec1_city', 'id_city.bk_mob_city', 'mobile_city.now_city', 
+	'mobile_city.id_city', 'mobile_city.ec2_city', 'ec1_city.live_city', 
+	'ec1_city.work_city', 'ec1_city.mobile_city', 'ec1_city.bk_mob_city', 
+	'ec2_city.now_city', 'ec2_city.id_city', 'ec2_city.ec1_city', 
+	'bk_mob_city.live_city', 'bk_mob_city.work_city', 'bk_mob_city.mobile_city', 
+	'bk_mob_city.ec2_city', 'live_area.work_area', 'now_area.live_area', 
+	'now_area.id_area', 'work_area.now_area', 'id_area.live_area', 
+	'id_area.work_area',]
+
+
+	
 
 # 离散型特征
 discrete_features =\
 	['amount', 'term', 'rate', 'service_fee', 'payment_amount',
-	'status', 'reloan', 'H1', 'source', 'channel', 'id_province',
-	'now_province', 'work_province', 'gender', 'id_type', 
-	'reason_code', 'industry', 'realname', 'address_contact',
-	'coll_result',]
+	'status', 'reloan', 'source', 'channel', 'id_province',
+	'now_province', 'work_province', 'gender', 'industry', 
+	'realname_isme', 'address_contact', 'coll_result',
+
+	'live_city.now_city', 'live_city.id_city', 'live_city.ec1_city',
+	'live_city.bk_mob_city','now_city.work_city', 'now_city.mobile_city',
+	'now_city.ec2_city', 'work_city.live_city', 'work_city.id_city',
+	'work_city.ec1_city', 'work_city.bk_mob_city', 'id_city.now_city',
+	'id_city.mobile_city', 'id_city.ec2_city', 'mobile_city.live_city',
+	'mobile_city.work_city', 'mobile_city.ec1_city', 'mobile_city.bk_mob_city',
+	'ec1_city.now_city', 'ec1_city.id_city', 'ec1_city.ec2_city',
+	'ec2_city.live_city', 'ec2_city.work_city', 'ec2_city.mobile_city',
+	'ec2_city.bk_mob_city', 'bk_mob_city.now_city', 'bk_mob_city.id_city',
+	'bk_mob_city.ec1_city', 'live_area.now_area', 'live_area.id_area',
+	'now_area.work_area', 'work_area.live_area', 'work_area.id_area',
+	'id_area.now_area',]
+
+    
 
 # 需编码的定性指标(橙色)
 qualitative_variables_list =\
