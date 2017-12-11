@@ -57,14 +57,14 @@ if __name__ == "__main__":
 
     df_continuous = df_continuous.fillna(df_continuous.mean())
     #print df_continuous.describe().ix['count'].describe()
-    df_corr_removed = sepCorrFeatures(df_continuous)
-    print df_corr_removed
+    df_continuous_removed_corr = sepCorrFeatures(df_continuous)
+#    print df_continuous_removed_corr
 
-
-
-
-
-
+    # 对上述去除共线性的连续型变量作特征选择
+#    path_to_write = working_space + "/results/df_features_selected.csv"
+    df_features_selected =\
+	    featureSelecting(df_continuous_removed_corr)
+    print df_features_selected
 
 
 
@@ -84,32 +84,4 @@ if __name__ == "__main__":
     # RFECV select features, 事先已知各样对应的分类结果
     #rfeSelectedIndex(df_selected_index)
     """
-
-    """
-    #2 客户基本信息+app+3rd
-    cust_app_3rd_index_list = [x for x in cust_app_3rd_index_list\
-	    if x not in corr_cust_app_3rd_index_list]
-    df_cust_app_3rd = df[['ovd_daynum'] + cust_app_3rd_index_list]
-    df_cust_app_3rd = df_cust_app_3rd.dropna(axis=0, how='any')
-    #print df_cust_app_3rd.describe().ix['count']
-    featureSelecting(df_cust_app_3rd, 'cust_app_3rd')
-    """
-
-    """
-    #1 去除高度共线性的特征
-    #print len(tel_detail_info_index_list)
-    df_tel_detail_info = df[['ovd_daynum'] + tel_detail_info_index_list]
-    df_tel_detail_info = df_tel_detail_info.dropna(axis=0, how='any')
-    df_tel_detail_info.applymap(lambda x: float(x))
-    df_removed_corr = sepCorrFeatures(df_tel_detail_info)
-    print df_removed_corr
-    """
-
-#    featureSelecting(df_tel_detail_info, 'tel_detail_info')
-
-
-
-
-
-
 

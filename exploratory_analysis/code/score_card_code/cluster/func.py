@@ -37,7 +37,7 @@ def clusterSelectedIndex(df_selected_index):
 	print df_corr_t1, '\n'
 
     datasets = df_selected_index.values
-    labels_list = df_selected_index.columns.tolist()
+    columns_list = df_selected_index.columns.tolist()
     maxabs_scaled = MaxAbsScaler().fit_transform(datasets)
     #print datasets.shape, '\n', datasets, '\n'
     #print maxabs_scaled.shape, '\n', maxabs_scaled, '\n'
@@ -48,7 +48,7 @@ def clusterSelectedIndex(df_selected_index):
     model = KMeans(n_clusters=k, n_jobs=4, max_iter=iteration)
     y_pred = model.fit_predict(maxabs_scaled)
     print pd.Series(model.labels_).value_counts()
-    df_cluster_centers = pd.DataFrame(model.cluster_centers_, columns=labels_list)
+    df_cluster_centers = pd.DataFrame(model.cluster_centers_, columns=columns_list)
     df_cluster_centers.to_csv('cluster_' + str(k) + '_centers_.csv')
     print df_cluster_centers
     #print y_pred
@@ -68,67 +68,73 @@ def clusterSelectedIndex(df_selected_index):
     plt.show()
 
 
-#feature seleceting 电话详单, 客户信息+p2p+第三方, 订单信息
-def featureSelecting(df_index_tobe_selected, *path_to_write):
-    #print df_index_tobe_selected.describe()
+#feature seleceting
+def featureSelecting(df_continuous_removed_corr, *path_to_write):
+    #print df_continuous_removed_corr.describe()
 
-    """
-    datasets = df_index_tobe_selected.values
-    labels_list = df_index_tobe_selected.columns.tolist()
+    datasets = df_continuous_removed_corr.values
+    columns_list = df_continuous_removed_corr.columns.tolist()
+    #print columns_list
 
     #1 Normalizer()
     #normal_scaler = Normalizer().fit_transform(datasets)
     #print normal_scaler[:, 0]
 
     #2 MaxAbsScaler [采用]
-    maxabs_scaler = MaxAbsScaler().fit_transform(datasets)
+#    maxabs_scaler = MaxAbsScaler().fit_transform(datasets)
     #print datasets.shape, '\n', datasets, '\n'
     #print maxabs_scaler.shape, '\n', maxabs_scaler, '\n'
-    y = maxabs_scaler[:, 0]
-    X = maxabs_scaler[:, 1:]
+#    y = maxabs_scaler[:, 0]
+#    X = maxabs_scaler[:, 1:]
+    #print X.shape, '\n', X, '\n'
+    #print y.shape, '\n', y, '\n'
+
+    #3 Standardization
+    std_scaler = StandardScaler().fit(datasets)
+    std_scaled = std_scaler.transform(datasets)
+    y = std_scaled[:, 0]
+    X = std_scaled[:, 1:]
+    #print datasets
     #print X.shape, '\n', X, '\n'
     #print y.shape, '\n', y, '\n'
 
     # RandomizedLasso [采用]
     rlasso = RandomizedLasso()
     rlasso.fit(X, y)
-    rank_list = sorted(zip(labels_list[1:], 
+    list_features_rank = sorted(zip(columns_list[1:], 
 	    map(lambda x: round(x, 4), rlasso.scores_)),
 	    key=lambda x: x[1], reverse=True)
+    df_features_rank = pd.DataFrame(list_features_rank,
+	    columns=['features_label', 'features_rank',])
 
-    #1 RandomFroestRegressor
-    #rf = RandomForestRegressor()
-    #rf.fit(X, y)
-    #print sorted(zip(map(lambda x: round(x, 4), rf.feature_importances_),
-	#    labels_list[1:]), reverse=True)
+    # 如果选择了存数路径, 则将连续型特征及其排名得分存入指定文件中
+#    if path_to_write:
+#	df_features_rank.to_csv(path_to_write, index=False)
 
-    #2 target should be types or muticlasses [removed]
-    #clf = ExtraTreesClassifier()
-    #clf.fit(X, y)
-    #print sorted(zip(map(lambda x: round(x, 4), clf.feature_importances_),
-	#    labels_list[1:]), reverse=True)
+    list_columns_features_selected =\
+	    df_features_rank[df_features_rank[
+	    'features_rank']>=0.8]['features_label'].values.tolist()
+#    print list_features_rank
+#    print df_features_rank
+#    print list_columns_features_selected
+    df_features_selected = df_continuous_removed_corr[list_columns_features_selected]
+    return df_features_selected
 
-    #print rank_list
-    df_score_rank = pd.DataFrame(rank_list, columns=['label', 'score_rank',])
-    # save the result
-    print df_score_rank[df_score_rank['score_rank']>=0.8]['label'].values.tolist()
-    print '\n\n'
-    #df_score_rank.to_csv(filename + '.csv', index=False)
-    """
 
-def sepCorrFeatures(df_index_tobe_selected):
+
+def sepCorrFeatures(df_tobe_removed_corr):
     """输入一个DataFrame或ndarray, 筛选高度共线性变量,
 	返回删除共线性特征后的DataFrame"""
     #DataFrame.corr(method='pearson', min_periods=1)
     #method: ['pearson', 'kendall', 'spearman',]
 
-    all_features_list = df_index_tobe_selected.columns.tolist()
+    all_features_list = df_tobe_removed_corr.columns.tolist()
 #    print "去除共线性前的特征数: ", len(all_features_list)
     # 截取correlation coefficient > corr_coef_ 部分, 返回截取后的DataFrame
     corr_coef_ = 0.8
 
     # 计算特征间相关系数矩阵, 作为循环判断的起始条件
-    df_corr = df_index_tobe_selected.corr()
+    df_corr = df_tobe_removed_corr.corr()
     df_corr_t1 = df_corr[df_corr >= corr_coef_].replace(1.0, np.nan)
     df_corr_t1.dropna(axis=0, how='all', inplace=True)
     df_corr_t1.dropna(axis=1, how='all', inplace=True)
@@ -166,7 +172,7 @@ def sepCorrFeatures(df_index_tobe_selected):
 	    feature_tobe_removed_list.append(corr_feature[1])
         else:
 #	    print '拟删除特征: ', corr_feature[0]
-	    #df_index_tobe_selected.drop(corr_feature[0], axis=1, inplace=True)
+	    #df_tobe_removed_corr.drop(corr_feature[0], axis=1, inplace=True)
 	    df_corr_t1.drop(corr_feature[0], axis=0, inplace=True)
 	    df_corr_t1.drop(corr_feature[0], axis=1, inplace=True)
 	    df_corr_t1.dropna(axis=0, how='all', inplace=True)
@@ -175,9 +181,8 @@ def sepCorrFeatures(df_index_tobe_selected):
 
 #	print '新特征间相关系数矩阵特征数: ', len(df_corr_t1), '\n'
 #	print df_corr_t1
-
 #    print feature_tobe_removed_list
-    return df_index_tobe_selected[[f for f in all_features_list\
+    return df_tobe_removed_corr[[f for f in all_features_list\
 	    if f not in feature_tobe_removed_list]]
 
 
@@ -222,11 +227,7 @@ def onehotDiscreteFeatures(df):
     return [dict_all_cates_label_encoder, df_onehot_encoded]
 
 
-
-
-
-
-# PCA 降维
+# PCA 降维后聚类，初步判断聚类数
 def pcaTelDetailInfo(df_tel_detail_info):
     # 特征选择完成后进行降维处理
     df_tel_detail_info.fillna(df_tel_detail_info.mean(), inplace=True)
