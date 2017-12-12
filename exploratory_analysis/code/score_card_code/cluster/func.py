@@ -15,8 +15,10 @@ from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import RandomizedLasso
 
-from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
+
+from sklearn.cluster import KMeans
 from sklearn.model_selection import StratifiedKFold
 from sklearn.feature_selection import RFECV
 from sklearn.svm import SVC
@@ -68,39 +70,60 @@ def clusterSelectedIndex(df_selected_index):
     plt.show()
 
 
-#feature seleceting
+def sampleClusteringPCA(df_features):
+    """利用sklearn.decomposition.PAC对所选的特征降维"""
+    #print df_features.describe()
+    #print df_features.describe().ix['count']
+    print "原始数据: ", df_features.shape
+#    features_reduced = PCA(n_components=0.95).fit(df_features.values)
+#    print "返回的降维后数据: "
+#    print features_reduced.components_.shape
+#    print features_reduced.components_,
+    #print features_reduced.explained_variance_
+    #print features_reduced.explained_variance_ratio_
+
+    datasets = df_features.values[:5000]
+    k = 4
+    iteration = 500
+    model = KMeans(n_clusters=k, n_jobs=4, max_iter=iteration)
+    y_pred = model.fit_predict(datasets)
+    print "聚类中心:\n", model.cluster_centers_.shape, '\n', model.cluster_centers_
+    print "样本标签:\n", model.labels_.shape, '\n', model.labels_
+
+    tsne_reduced = TSNE().fit_transform(datasets)
+    plt.figure(figsize=(10, 5))
+    plt.scatter(tsne_reduced[:, 0], tsne_reduced[:, 1], c=y_pred)
+    plt.show()
+
+
+
+#feature seleceting 
 def featureSelecting(df_continuous_removed_corr, *path_to_write):
+    """对所有变量作标准化处理, 然后分为X自变量(除ovd_daynum)和y因变量(逾期天数),
+	    采用随机Lasso选择对y回归贡献得分大于0.8的X,
+	    返回y和X组成的特征选择后的数据"""
     #print df_continuous_removed_corr.describe()
 
     datasets = df_continuous_removed_corr.values
     columns_list = df_continuous_removed_corr.columns.tolist()
     #print columns_list
 
-    #1 Normalizer()
+    #1 Normalizer() 归一化
     #normal_scaler = Normalizer().fit_transform(datasets)
     #print normal_scaler[:, 0]
 
-    #2 MaxAbsScaler [采用]
-#    maxabs_scaler = MaxAbsScaler().fit_transform(datasets)
-    #print datasets.shape, '\n', datasets, '\n'
-    #print maxabs_scaler.shape, '\n', maxabs_scaler, '\n'
-#    y = maxabs_scaler[:, 0]
-#    X = maxabs_scaler[:, 1:]
-    #print X.shape, '\n', X, '\n'
-    #print y.shape, '\n', y, '\n'
-
-    #3 Standardization
-    std_scaler = StandardScaler().fit(datasets)
-    std_scaled = std_scaler.transform(datasets)
+    #2 StandardScaler() 标准化
+    std_scaled = StandardScaler().fit_transform(datasets)
     y = std_scaled[:, 0]
     X = std_scaled[:, 1:]
-    #print datasets
-    #print X.shape, '\n', X, '\n'
-    #print y.shape, '\n', y, '\n'
+#    print datasets
+#    print X.shape, '\n', X, '\n'
+#    print y.shape, '\n', y, '\n'
 
-    # RandomizedLasso [采用]
+    # RandomizedLasso 
     rlasso = RandomizedLasso()
     rlasso.fit(X, y)
+    # 给ndarray格式特征匹配上特征名(此处不包括y逾期天数)
     list_features_rank = sorted(zip(columns_list[1:], 
 	    map(lambda x: round(x, 4), rlasso.scores_)),
 	    key=lambda x: x[1], reverse=True)
@@ -108,18 +131,34 @@ def featureSelecting(df_continuous_removed_corr, *path_to_write):
 	    columns=['features_label', 'features_rank',])
 
     # 如果选择了存数路径, 则将连续型特征及其排名得分存入指定文件中
-#    if path_to_write:
-#	df_features_rank.to_csv(path_to_write, index=False)
+    if path_to_write:
+	df_features_rank.to_csv(path_to_write[0], index=False)
 
+    # 截取得分在0.8及以上的特征X
     list_columns_features_selected =\
 	    df_features_rank[df_features_rank[
 	    'features_rank']>=0.8]['features_label'].values.tolist()
+    # 再添加上y(逾期天数), 构成进行样本聚类的所有特征
+    list_columns_features_selected.insert(0, 'ovd_daynum')
 #    print list_features_rank
 #    print df_features_rank
 #    print list_columns_features_selected
+    # 在输入DataFrame上删减后的DataFrame
     df_features_selected = df_continuous_removed_corr[list_columns_features_selected]
-    return df_features_selected
 
+    # 对删减后的DataFrame作标准化后再返回, 方便直接进行样本聚类
+    #print df_features_selected.values
+    #print StandardScaler().fit_transform(df_features_selected.values)
+    df_continuous_features_selected =\
+	    pd.DataFrame(StandardScaler().fit_transform(df_features_selected.values),
+	    index=df_features_selected.index, columns=df_features_selected.columns)
+    #print df_features_selected.head()
+    #print df_continuous_features_selected.head()
+    # 按行展示均值和方差
+    #print df_continuous_features_selected.values.mean(axis=0)
+    #print df_continuous_features_selected.values.var(axis=0)
+
+    return df_continuous_features_selected
 
 
 def sepCorrFeatures(df_tobe_removed_corr):
@@ -194,7 +233,7 @@ def onehotDiscreteFeatures(df):
     #print count_ss
     #print count_ss.describe()
 
-    df_init = pd.DataFrame(np.zeros(len(df)), columns=['init'])
+    df_init = pd.DataFrame(np.zeros(len(df)), columns=['init'], index=df.index)
     # 以字典的格式存放所有列的重编码规则
     dict_all_cates_label_encoder = {}
     for c in df.columns:
@@ -217,33 +256,14 @@ def onehotDiscreteFeatures(df):
 	onehot_encoded = OneHotEncoder().fit_transform(label_encoded).toarray()
 	columns = [c + '_mat_' + str(i) for i in range(len(label_encoder.classes_))]
 #	print len(onehot_encoded), '\n', onehot_encoded, '\n'
+	# 按照order_id进行列合并(axis=1)
 	df_init = pd.concat([df_init,
-		pd.DataFrame(onehot_encoded, columns=columns)], axis=1)
+		pd.DataFrame(onehot_encoded, columns=columns, index=df.index)], axis=1)
     df_onehot_encoded = df_init.drop(columns=['init'], axis=1)
 #    print dict_all_cates_label_encoder['industry'][0]
 #    print dict_all_cates_label_encoder
 #    print df_onehot_encoded.head()
 
     return [dict_all_cates_label_encoder, df_onehot_encoded]
-
-
-# PCA 降维后聚类，初步判断聚类数
-def pcaTelDetailInfo(df_tel_detail_info):
-    # 特征选择完成后进行降维处理
-    df_tel_detail_info.fillna(df_tel_detail_info.mean(), inplace=True)
-    array_tel_detail_info = df_tel_detail_info.values
-    array_std_detail_info = Normalizer().fit_transform(array_tel_detail_info)
-    #print array_tel_detail_info.shape
-    #print array_tel_detail_info
-    print array_std_detail_info.shape
-    #print array_std_detail_info
-
-    pca = PCA(n_components='mle')
-    #pca = PCA(n_components=5)
-    print pca.fit_transform(array_std_detail_info)
-    #print pca.components_
-#    print 'explained_variance_ratio_', pca.explained_variance_ratio_#.sum()
-    #print 'explained_variance_', pca.explained_variance_
-    print 'n_components', pca.n_components_
 
 
