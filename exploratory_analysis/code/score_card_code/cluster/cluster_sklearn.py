@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import time
 
 from data import removed_features
 from data import discrete_features
@@ -14,10 +15,11 @@ from data import selected_tel_detail_info_index_list
 from data import selected_cust_app_3rd_index_list
 from data import selected_order_info_index_list
 
+from func import discreteFeaturesSelecting
 from func import onehotDiscreteFeatures
 from func import sepCorrFeatures
-from func import featureSelecting
-from func import sampleClusteringPCA
+from func import continuousFeaturesSelecting
+from func import sampleClustering
 from func import clusterSelectedIndex
 
 
@@ -25,10 +27,10 @@ from func import clusterSelectedIndex
 if __name__ == "__main__":
     working_space = "/mnt/hgfs/windows_desktop/exploratory_analysis/" +\
 		      "data/dataset_score_card/cleaned_full_data/test/"
-    """
     #filename = "coll_dataset2_test.txt"
     filename = "coll_dataset2.txt"
 
+    """
     df = pd.read_csv(working_space + filename, index_col=0)
     selected_features = [ft for ft in df.columns if ft not in removed_features]
     df_selected = df[selected_features]
@@ -37,12 +39,21 @@ if __name__ == "__main__":
     #print count_ss.describe()
     #print count_ss[count_ss == 0]
 
-    # 统计离散型变量的特征
-    df_discrete = df_selected[discrete_features]
+
+    #对离散型变量利用方差分析做特征选择, 返回拟选择离散特征名列表
+    df_discrete = df_selected[['ovd_daynum'] + discrete_features]
+    #print df_discrete.head()
+    list_discrete_features_selected = discreteFeaturesSelecting(df_discrete)
+
+
+    # 对筛选后的离散变量哑编码
+    df_discrete = df_selected[list_discrete_features_selected]
     # 将缺失值填充为正无穷, 作为一类
     # 虽然LabelEncoder可以自动将缺失值划为一类
     # 但是无法将多个缺失值划为一类, 原因是np.nan != np.nan)
     df_discrete = df_discrete.fillna(float('inf'))
+    onehotDiscreteFeatures(df_discrete)
+
     # 返回哑编码后的离散型指标l[1], 同时返回每个指标的构建关系l[0]
     label_encoder_encoded_data_list = onehotDiscreteFeatures(df_discrete)
     df_discrete_features_selected = label_encoder_encoded_data_list[1]
@@ -50,6 +61,7 @@ if __name__ == "__main__":
     dict_discrete_features_onehot_encoded = label_encoder_encoded_data_list[0]
     print "离散型变量数: \t", df_discrete.shape
     print "重编码后的离散变量数: \t", df_discrete_features_selected.shape
+
 
     # 去除连续型变量的共线性, 返回去共线性后的DataFrame
     continuous_features = [ft for ft in df_selected.columns\
@@ -67,8 +79,9 @@ if __name__ == "__main__":
     # 对上述去除共线性的连续型变量做特征选择, 返回选择后的数据集
     path_to_write = working_space + "results/features_selected.csv"
     # 同时选择是否输出特征选择的依据(加上第二个存数路径参数),即各变量的得分
-    df_continuous_features_selected = featureSelecting(df_continuous_removed_corr)
-	    #featureSelecting(df_continuous_removed_corr, path_to_write)
+    df_continuous_features_selected =\
+	    continuousFeaturesSelecting(df_continuous_removed_corr)
+	    #continuousFeaturesSelecting(df_continuous_removed_corr, path_to_write)
     #print df_continuous_features_selected.head()
     print "特征选择后的连续变量数: \t", df_continuous_features_selected.shape, '\n'
 
@@ -82,13 +95,16 @@ if __name__ == "__main__":
 	    df_continuous_features_selected], axis=1)
     #print df_features.columns.values
     print "合并离散连续变量后的总数: \t", df_features.shape
+
+#    df_features.to_csv(working_space + "results/df_features_" +\
+#	    time.strftime("%Y%m%d", time.localtime()) + ".csv")
     """
 
-    #df_features.to_csv(working_space + 'results/df_features.csv')
+    # 样本聚类()
+    df_features = pd.read_csv(working_space +\
+	    'results/df_features_20171213.csv', index_col=0)
+    sampleClustering(df_features)
 
-    # 利用PCA做降维处理
-    df_features = pd.read_csv(working_space + 'results/df_features.csv', index_col=0)
-    sampleClusteringPCA(df_features)
 
 
     """
@@ -97,4 +113,5 @@ if __name__ == "__main__":
     # RFECV select features, 事先已知各样对应的分类结果
     #rfeSelectedIndex(df_selected_index)
     """
+
 

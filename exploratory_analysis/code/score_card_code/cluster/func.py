@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 #from sklearn.feature_selection import VarianceThreshold
 from sklearn.preprocessing import MinMaxScaler
@@ -10,6 +11,8 @@ from sklearn.preprocessing import Normalizer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
+
+from sklearn.feature_selection import SelectPercentile, f_classif
 
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.ensemble import RandomForestRegressor
@@ -70,35 +73,55 @@ def clusterSelectedIndex(df_selected_index):
     plt.show()
 
 
-def sampleClusteringPCA(df_features):
+def sampleClustering(df_features):
     """利用sklearn.decomposition.PAC对所选的特征降维"""
     #print df_features.describe()
     #print df_features.describe().ix['count']
     print "原始数据: ", df_features.shape
-#    features_reduced = PCA(n_components=0.95).fit(df_features.values)
-#    print "返回的降维后数据: "
-#    print features_reduced.components_.shape
-#    print features_reduced.components_,
-    #print features_reduced.explained_variance_
-    #print features_reduced.explained_variance_ratio_
+    pca_reduced = PCA(n_components=0.9).fit(df_features.T.values)
+    print "pca降维后数据: ",  pca_reduced.components_.T.shape
+    #print pca_reduced.explained_variance_
+    #print pca_reduced.explained_variance_ratio_
 
+    from sklearn.cluster import MeanShift
     datasets = df_features.values[:5000]
-    k = 4
+    #datasets = pca_reduced.components_.T[:5000]
+    af = AffinityPropagation().fit(datasets)
+    print len(af.cluster_centers_indices_)
+
+
+    """
+    #datasets = df_features.values[:2000]
+    datasets = pca_reduced.components_.T[:5000]
+    k = 5
     iteration = 500
     model = KMeans(n_clusters=k, n_jobs=4, max_iter=iteration)
     y_pred = model.fit_predict(datasets)
-    print "聚类中心:\n", model.cluster_centers_.shape, '\n', model.cluster_centers_
-    print "样本标签:\n", model.labels_.shape, '\n', model.labels_
+    #print "聚类中心:\n", model.cluster_centers_.shape, '\n', model.cluster_centers_
+    #print "样本标签:\n", model.labels_.shape, '\n', model.labels_
 
     tsne_reduced = TSNE().fit_transform(datasets)
-    plt.figure(figsize=(10, 5))
-    plt.scatter(tsne_reduced[:, 0], tsne_reduced[:, 1], c=y_pred)
+    fig, ax = plt.subplots()
+    x,y = tsne_reduced[:, 0], tsne_reduced[:, 1]
+    ax.scatter(x, y, c=y_pred)
+    ax.legend()
+    ax.grid(True)
     plt.show()
+    """
+
+    """
+    tsne_reduced = TSNE(n_components=3).fit_transform(datasets)
+    #print tsne_reduced
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    x,y,z = tsne_reduced[:, 0], tsne_reduced[:, 1], tsne_reduced[:, 2]
+    ax.scatter(x,y,z, c=y_pred)
+    plt.show()
+    """
 
 
-
-#feature seleceting 
-def featureSelecting(df_continuous_removed_corr, *path_to_write):
+#continuous features seleceting 
+def continuousFeaturesSelecting(df_continuous_removed_corr, *path_to_write):
     """对所有变量作标准化处理, 然后分为X自变量(除ovd_daynum)和y因变量(逾期天数),
 	    采用随机Lasso选择对y回归贡献得分大于0.8的X,
 	    返回y和X组成的特征选择后的数据"""
@@ -228,7 +251,7 @@ def sepCorrFeatures(df_tobe_removed_corr):
 def onehotDiscreteFeatures(df):
     """将定性变量重编码为哑变量, 返回转换后的新DataFrame, 同时返回各变量的重编码规则
 	以列表的形式返回 [dict_all_cates_label_encoder, df_onehot_encoded]"""
-    #print df.describe().ix['count']
+    print df.describe().ix['count']
     #count_ss = df.describe().ix['count']
     #print count_ss
     #print count_ss.describe()
@@ -265,5 +288,28 @@ def onehotDiscreteFeatures(df):
 #    print df_onehot_encoded.head()
 
     return [dict_all_cates_label_encoder, df_onehot_encoded]
+
+def discreteFeaturesSelecting(df):
+    """对输入离散特征做选择, 返回拟选择特征名列表
+	(对定性变量与逾期天数做方差分析, 即Anova F-Value检验)"""
+    #print df.describe()
+    return ['payment_amount', 'reloan', 'gender',]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
