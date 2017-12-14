@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from itertools import combinations, permutations
 
 #from sklearn.feature_selection import VarianceThreshold
 from sklearn.preprocessing import MinMaxScaler
@@ -72,28 +73,21 @@ def clusterSelectedIndex(df_selected_index):
     plt.scatter(X_tsne[:,0], X_tsne[:, 1], c=y_pred)
     plt.show()
 
-
 def sampleClustering(df_features):
-    """利用sklearn.decomposition.PAC对所选的特征降维"""
-    #print df_features.describe()
-    #print df_features.describe().ix['count']
     print "原始数据: ", df_features.shape
-    pca_reduced = PCA(n_components=0.9).fit(df_features.T.values)
-    print "pca降维后数据: ",  pca_reduced.components_.T.shape
-    #print pca_reduced.explained_variance_
-    #print pca_reduced.explained_variance_ratio_
+    #print df_features.describe().ix['count']
+    
+    #print list(combinations(df_features.columns, 5))
+    
+    #df_features = df_features.sample(5, axis=1)[:5000]
+    df_features = df_features[:5000]
+    datasets = StandardScaler().fit_transform(df_features.values)
+    print "随机抽样: ", datasets.shape
+    print "",
+    #datasets = PCA(n_components=0.9).fit(datasets.T).components_.T
+    #print "PCA降维后: ", datasets.shape
 
-    from sklearn.cluster import MeanShift
-    datasets = df_features.values[:5000]
-    #datasets = pca_reduced.components_.T[:5000]
-    af = AffinityPropagation().fit(datasets)
-    print len(af.cluster_centers_indices_)
-
-
-    """
-    #datasets = df_features.values[:2000]
-    datasets = pca_reduced.components_.T[:5000]
-    k = 5
+    k = 4
     iteration = 500
     model = KMeans(n_clusters=k, n_jobs=4, max_iter=iteration)
     y_pred = model.fit_predict(datasets)
@@ -104,10 +98,8 @@ def sampleClustering(df_features):
     fig, ax = plt.subplots()
     x,y = tsne_reduced[:, 0], tsne_reduced[:, 1]
     ax.scatter(x, y, c=y_pred)
-    ax.legend()
-    ax.grid(True)
+    #ax.grid(True)
     plt.show()
-    """
 
     """
     tsne_reduced = TSNE(n_components=3).fit_transform(datasets)
@@ -157,10 +149,10 @@ def continuousFeaturesSelecting(df_continuous_removed_corr, *path_to_write):
     if path_to_write:
 	df_features_rank.to_csv(path_to_write[0], index=False)
 
-    # 截取得分在0.8及以上的特征X
+    # 截取得分在1.0及以上的特征X
     list_columns_features_selected =\
 	    df_features_rank[df_features_rank[
-	    'features_rank']>=0.8]['features_label'].values.tolist()
+	    'features_rank']>=1.0]['features_label'].values.tolist()
     # 再添加上y(逾期天数), 构成进行样本聚类的所有特征
     list_columns_features_selected.insert(0, 'ovd_daynum')
 #    print list_features_rank
@@ -197,7 +189,10 @@ def sepCorrFeatures(df_tobe_removed_corr):
 
     # 计算特征间相关系数矩阵, 作为循环判断的起始条件
     df_corr = df_tobe_removed_corr.corr()
-    df_corr_t1 = df_corr[df_corr >= corr_coef_].replace(1.0, np.nan)
+    #df_corr_t1 = df_corr[df_corr >= corr_coef_].replace(1.0, np.nan)
+    # 认为相关系数大于0.8或者小于-0.8的为重度相关
+    df_corr_t1 = df_corr[(df_corr >= corr_coef_) |
+	    (df_corr <= -corr_coef_)].replace(1.0, np.nan)
     df_corr_t1.dropna(axis=0, how='all', inplace=True)
     df_corr_t1.dropna(axis=1, how='all', inplace=True)
     feature_tobe_removed_list = []

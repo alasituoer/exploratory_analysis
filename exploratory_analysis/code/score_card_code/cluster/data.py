@@ -52,17 +52,6 @@ discrete_features =\
 	'id_area.now_area',]
 
     
-
-# 需编码的定性指标(橙色)
-qualitative_variables_list =\
-	['H1', 'source', 'channel', 'id_province', 
-	'now_province', 'work_province', 'gender', 'industry',]
-# 已编码的定性指标（黄色）
-encoded_qual_var_list =\
-	['status', 'reloan', 'id_type', 'reason_code', 'realname',\
-	'address_contact', 'coll_result',]
-
-
 # 客户地址信息
 cust_address_list =\
         ['live_city.now_city', 'live_city.work_city', 'live_city.id_city',
@@ -94,11 +83,6 @@ cust_address_list =\
         'work_area.live_area', 'work_area.now_area', 'work_area.id_area',
         'id_area.live_area', 'id_area.now_area', 'id_area.work_area',]
 
-# 订单有效指标
-order_info_index_list =\
-	['amount', 'term', 'rate', 'service_fee', 'payment_amount',]
-selected_order_info_index_list = ['payment_amount', 'term', 'service_fee',]
-
 
 
 # 客户基本信息+app+第三方有效指标
@@ -111,14 +95,6 @@ cust_app_3rd_index_list =\
 	'address_collection_count', 'sms_fail_count', 'phoneToptenCount', 
 	'address_count', 'apply_fail_count2', 'trade_register_count', 
 	'last_usetime_cha',]
-#拟选择特征(客户基本信息+app+第三方信息)
-selected_cust_app_3rd_index_list =\
-	['face_compare', 'zhima_score', 'age', 'dialing_count', 
-	'contact_count', 'black_circle_count', 'calllog_trad_count', 
-	'collection_count', 'dialing_one', 'address_black_count', 
-	'sms_fail_count', 'phoneToptenCount', 'address_count', 
-	'apply_fail_count2', 'trade_register_count', 'last_usetime_cha', 
-	'address_collection_count', 'called_count', 'e5_value_count']
 
 
 # 电话详单有效指标
@@ -152,6 +128,21 @@ tel_detail_info_index_list = \
 	'I3', 'I4', 'I5',]
 
 # 拟选择的特征
+features_selected =\
+	['ovd_daynum', 'F3', 'F5', 'G1', 'I4', 'zhima_score', 
+	'age', 'contact_count', 'collection_count', 'dialing_one',
+	'address_black_count', 'sms_fail_count',]
+features_will_be_selected =\
+	['ovd_daynum', 'I11_2', 'C8_2', 'D2_3', 'D2_5', 'D3_1', 'D3_5', 
+	'D7', 'D8', 'D9_1', 'D9_2', 'D9_4', 'D10_2', 'E2_1', 'E3_1', 
+	'E3_4', 'E3_5', 'E5_1', 'F3', 'F5', 'F6_1', 'F6_4', 'F7', 
+	'F8_1', 'F8_2', 'F9_1', 'G1', 'H2', 'H3', 'I1_1', 'I1_3', 'I2_1', 
+	'I2_2', 'I2_3', 'I3', 'I4', 
+	'face_compare', 'zhima_score', 'age', 'contact_count', 
+	'calllog_trad_count', 'collection_count', 'dialing_one', 
+	'address_black_count', 'sms_fail_count', 'phoneToptenCount', 
+	'address_count', 'apply_fail_count2', 'trade_register_count', 
+	'last_usetime_cha',]
 # random lasso
 selected_tel_detail_info_index_list =\
 	['E3_4', 'F5', 'I2_3', 'I2_4', 'E5_1', 'F6_4', 'E3_5', 
