@@ -74,32 +74,47 @@ def clusterSelectedIndex(df_selected_index):
     plt.show()
 
 def sampleClustering(df_features):
+    path_to_save = "/mnt/hgfs/windows_desktop/exploratory_analysis/results/20171218/"
     print "原始数据: ", df_features.shape
     #print df_features.describe().ix['count']
     
     #print list(combinations(df_features.columns, 5))
     
     #df_features = df_features.sample(5, axis=1)[:5000]
-    df_features = df_features[:5000]
+    n_samples = 20000
+    #n_samples = len(df_features)
+    #df_features = df_features[:n_samples]
+    np.random.seed(6143)
+    df_features = df_features.sample(n_samples)
+    #print df_features
     datasets = StandardScaler().fit_transform(df_features.values)
-    print "随机抽样: ", datasets.shape
-    print "",
-    #datasets = PCA(n_components=0.9).fit(datasets.T).components_.T
+    #print "随机抽样并标准化后: ", datasets.shape
+    #datasets = PCA(n_components=0.8).fit(datasets.T).components_.T
     #print "PCA降维后: ", datasets.shape
 
-    k = 4
-    iteration = 500
-    model = KMeans(n_clusters=k, n_jobs=4, max_iter=iteration)
-    y_pred = model.fit_predict(datasets)
-    #print "聚类中心:\n", model.cluster_centers_.shape, '\n', model.cluster_centers_
-    #print "样本标签:\n", model.labels_.shape, '\n', model.labels_
+    for k in range(3, 11):
+	iteration = 500
+	model = KMeans(n_clusters=k, n_jobs=4, max_iter=iteration)
+	y_pred = model.fit_predict(datasets)
+	#print "聚类中心:\n", model.cluster_centers_.shape, '\n', model.cluster_centers_
+	#print "样本标签:\n", model.labels_.shape, '\n', model.labels_
+	df_features['labels'] = model.labels_
+	#print df_features.head()
 
-    tsne_reduced = TSNE().fit_transform(datasets)
-    fig, ax = plt.subplots()
-    x,y = tsne_reduced[:, 0], tsne_reduced[:, 1]
-    ax.scatter(x, y, c=y_pred)
-    #ax.grid(True)
-    plt.show()
+	# 保存质心和分类标签
+	name_to_save = str(n_samples) + "_samples_clusters_" + str(k)
+	pd.DataFrame(model.cluster_centers_).to_csv(
+		path_to_save + "centers_" + name_to_save + ".csv")
+	df_features.to_csv(path_to_save + "labels_" + name_to_save + ".csv")
+
+	tsne_reduced = TSNE().fit_transform(datasets)
+	fig, ax = plt.subplots()
+	x,y = tsne_reduced[:, 0], tsne_reduced[:, 1]
+	ax.scatter(x, y, c=y_pred)
+	ax.grid(True)
+
+	plt.savefig(path_to_save + "picture_" + name_to_save + '.png', dpi=100)
+	#plt.show()
 
     """
     tsne_reduced = TSNE(n_components=3).fit_transform(datasets)

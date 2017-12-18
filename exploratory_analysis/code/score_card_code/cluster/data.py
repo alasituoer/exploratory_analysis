@@ -128,10 +128,14 @@ tel_detail_info_index_list = \
 	'I3', 'I4', 'I5',]
 
 # 拟选择的特征
+#features_selected =\
+#	['ovd_daynum', 'F3', 'F5', 'G1', 'I4', 'zhima_score', 
+#	'age', 'contact_count', 'collection_count', 'dialing_one',
+#	'address_black_count', 'sms_fail_count',]
+#features_selected =\
+#	['ovd_daynum', 'F3', 'I4', 'age', 'collection_count', 'sms_fail_count',]
 features_selected =\
-	['ovd_daynum', 'F3', 'F5', 'G1', 'I4', 'zhima_score', 
-	'age', 'contact_count', 'collection_count', 'dialing_one',
-	'address_black_count', 'sms_fail_count',]
+	['F3', 'I4', 'age', 'contact_count',]
 features_will_be_selected =\
 	['ovd_daynum', 'I11_2', 'C8_2', 'D2_3', 'D2_5', 'D3_1', 'D3_5', 
 	'D7', 'D8', 'D9_1', 'D9_2', 'D9_4', 'D10_2', 'E2_1', 'E3_1', 
